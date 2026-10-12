@@ -1,0 +1,49 @@
+{
+  "owner": "Sumukh-2006",
+  "repository": "Sumukh-2006/SE-Mini-Project_Team-H-12",
+  "title": "H-12 HMS Part 2",
+  "status": "Not created; awaiting explicit publication authorization",
+  "fields": {
+    "Status": [
+      "Backlog",
+      "Ready",
+      "In progress",
+      "In review",
+      "Done"
+    ],
+    "Priority": [
+      "High",
+      "Medium",
+      "Low"
+    ],
+    "Story Points": "Number",
+    "Assignee": "Built-in",
+    "Sprint": {
+      "type": "Iteration",
+      "iterations": [
+        {
+          "title": "Sprint 1",
+          "start": "2026-10-19",
+          "duration_days": 5
+        },
+        {
+          "title": "Sprint 2",
+          "start": "2026-10-26",
+          "duration_days": 5
+        }
+      ]
+    }
+  },
+  "views": [
+    "Backlog table",
+    "Status board",
+    "Sprint 1",
+    "Sprint 2"
+  ],
+  "assignee_mapping": {
+    "Shashank D": "shashankd06",
+    "Sumukh Shandilya": "Sumukh-2006",
+    "Supreeth K": null,
+    "Shashank K": null
+  }
+}
