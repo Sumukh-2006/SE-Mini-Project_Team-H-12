@@ -86,12 +86,15 @@ void menu(hms::HMS &app) {
   std::cout << "\n" << role << " menu\n";
   if (role == "Admin")
     std::cout << "1 Add doctor\n2 Set weekly availability\n3 List doctors\n4 "
-                 "Create user account\n";
+                 "Create user account\n5 Daily appointment report\n6 Export "
+                 "patient report\n7 Export daily report\n";
   if (role == "Receptionist")
     std::cout << "1 Register patient\n2 Search patients\n3 Filter doctors\n4 "
-                 "Book appointment\n";
+                 "Book appointment\n5 Update patient contact\n6 Cancel "
+                 "appointment\n7 Reschedule appointment\n";
   if (role == "Doctor")
-    std::cout << "1 Search patients\n";
+    std::cout
+        << "1 Search patients\n2 My daily schedule\n3 Complete appointment\n";
   std::cout << "0 Logout\n";
   const int choice = number("Choice: ");
   if (choice == 0) {
@@ -124,6 +127,20 @@ void menu(hms::HMS &app) {
       int id = r == "Doctor" ? number("Linked Doctor ID: ") : 0;
       app.provision(name, password, r, id);
       std::cout << "User created\n";
+    } else if (choice == 5) {
+      auto r = app.dailyReport(input("Date (YYYY-MM-DD): "));
+      std::cout << "Total booked: " << r.totalBooked
+                << " | Scheduled: " << r.scheduled
+                << " | Canceled: " << r.canceled
+                << " | Completed: " << r.completed << '\n';
+    } else if (choice == 6) {
+      app.exportPatients(input("Output file (.csv or .txt): "));
+      std::cout << "Patient report exported\n";
+    } else if (choice == 7) {
+      auto date = input("Date (YYYY-MM-DD): ");
+      auto path = input("Output file (.csv or .txt): ");
+      app.exportDaily(date, path);
+      std::cout << "Daily report exported\n";
     } else
       throw std::invalid_argument("Unknown menu option");
   } else if (role == "Receptionist") {
@@ -150,11 +167,36 @@ void menu(hms::HMS &app) {
       auto a = app.book(patient, doctor, date, time);
       std::cout << "Appointment booked. Appointment ID: " << a.id << " | "
                 << a.date << " " << a.time << " | " << a.status << '\n';
+    } else if (choice == 5) {
+      auto id = input("Patient ID: ");
+      auto contact = input("New contact: ");
+      app.updateContact(id, contact);
+      std::cout << "Patient contact updated\n";
+    } else if (choice == 6) {
+      app.cancel(number("Appointment ID: "));
+      std::cout << "Appointment canceled\n";
+    } else if (choice == 7) {
+      auto id = number("Appointment ID: ");
+      auto date = input("New date (YYYY-MM-DD): ");
+      auto time = input("New time (HH:MM): ");
+      app.reschedule(id, date, time);
+      std::cout << "Appointment rescheduled\n";
     } else
       throw std::invalid_argument("Unknown menu option");
   } else if (choice == 1)
     showPatients(app.searchPatients(input("Patient ID or name: ")));
-  else
+  else if (choice == 2) {
+    auto appointments = app.mySchedule(input("Date (YYYY-MM-DD): "));
+    if (appointments.empty())
+      std::cout << "No scheduled appointments\n";
+    for (const auto &a : appointments)
+      std::cout << a.id << " | " << a.patientId << " | Doctor " << a.doctorId
+                << " | " << a.date << " " << a.time << " | " << a.status
+                << '\n';
+  } else if (choice == 3) {
+    app.complete(number("Appointment ID: "));
+    std::cout << "Appointment completed\n";
+  } else
     throw std::invalid_argument("Unknown menu option");
 }
 } // namespace
@@ -181,8 +223,9 @@ int main(int argc, char **argv) {
       demo(db, app);
       return 0;
     }
-    std::cout << "Hospital Management System | Sprint 1\n15-minute appointment "
-                 "slots | Local SQLite storage\n";
+    std::cout
+        << "Hospital Management System | Version 1.1\n15-minute appointment "
+           "slots | Local SQLite storage\n";
     auto q = db.prepare("SELECT COUNT(*) FROM users");
     q.step();
     if (q.integer(0) == 0) {

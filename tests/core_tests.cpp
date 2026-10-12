@@ -1,5 +1,30 @@
 #include "hms/hms.hpp"
+#include <chrono>
+#include <filesystem>
+#include <fstream>
 #include <gtest/gtest.h>
+#include <sstream>
+
+class TempDirectory {
+public:
+  std::filesystem::path path;
+  TempDirectory() {
+    path = std::filesystem::temp_directory_path() /
+           std::filesystem::path("hms-tests-" + hms::randomSalt());
+    std::filesystem::create_directory(path);
+  }
+  ~TempDirectory() {
+    std::error_code error;
+    std::filesystem::remove_all(path, error);
+  }
+};
+
+static std::string readFile(const std::filesystem::path &path) {
+  std::ifstream in(path);
+  std::ostringstream out;
+  out << in.rdbuf();
+  return out.str();
+}
 
 class Core : public ::testing::Test {
 protected:
@@ -147,4 +172,197 @@ TEST_F(Core, ForeignKeysAndDoctorLinks) {
                std::invalid_argument);
   EXPECT_THROW(app.provision("bad", "TestPass123", "Patient"),
                std::invalid_argument);
+}
+
+TEST_F(Core, UpdateContact) {
+  reception();
+  auto p = patient();
+  app.updateContact(p.id, "9000000008");
+  EXPECT_EQ(app.searchPatients(p.id)[0].contact, "9000000008");
+  EXPECT_THROW(app.updateContact("P999999", "9000000008"), std::runtime_error);
+  EXPECT_THROW(app.updateContact(p.id, "invalid"), std::invalid_argument);
+  app.logout();
+  app.login("doctor", "TestPass123");
+  EXPECT_THROW(app.updateContact(p.id, "9000000008"), std::runtime_error);
+}
+TEST_F(Core, TC_APP_03) {
+  reception();
+  auto p = patient();
+  auto a = app.book(p.id, 1, "2026-10-19", "09:00");
+  app.cancel(a.id);
+  auto q = db.prepare("SELECT status FROM appointments WHERE id=?");
+  q.bind(1, a.id);
+  ASSERT_TRUE(q.step());
+  EXPECT_EQ(q.text(0), "Canceled");
+  EXPECT_NO_THROW(app.book(p.id, 1, "2026-10-19", "09:00"));
+  EXPECT_THROW(app.cancel(a.id), std::runtime_error);
+  EXPECT_THROW(app.cancel(999), std::runtime_error);
+}
+TEST_F(Core, RescheduleIsAtomic) {
+  reception();
+  auto p = patient();
+  auto a = app.book(p.id, 1, "2026-10-19", "09:00");
+  app.book(p.id, 1, "2026-10-19", "09:15");
+  EXPECT_THROW(app.reschedule(a.id, "2026-10-19", "09:15"), std::runtime_error);
+  {
+    auto q = db.prepare("SELECT appt_time FROM appointments WHERE id=?");
+    q.bind(1, a.id);
+    ASSERT_TRUE(q.step());
+    EXPECT_EQ(q.text(0), "09:00");
+  }
+  EXPECT_THROW(app.reschedule(a.id, "2026-02-30", "09:00"),
+               std::invalid_argument);
+  EXPECT_NO_THROW(app.reschedule(a.id, "2026-10-19", "09:30"));
+  EXPECT_NO_THROW(app.book(p.id, 1, "2026-10-19", "09:00"));
+  app.cancel(a.id);
+  EXPECT_THROW(app.reschedule(a.id, "2026-10-19", "09:45"), std::runtime_error);
+}
+TEST_F(Core, DoctorsSeeOnlyOwnSchedule) {
+  app.login("admin", "TestPass123");
+  auto d = app.addDoctor("Dr Lee", "Dentist", "9000000003");
+  app.setAvailability(d.id, 1, "09:00", "17:00");
+  app.provision("doctor2", "TestPass123", "Doctor", d.id);
+  app.logout();
+  reception();
+  auto p = patient();
+  auto a = app.book(p.id, 1, "2026-10-19", "09:00");
+  auto other = app.book(p.id, d.id, "2026-10-19", "09:00");
+  app.logout();
+  app.login("doctor", "TestPass123");
+  auto result = app.mySchedule("2026-10-19");
+  ASSERT_EQ(result.size(), 1u);
+  EXPECT_EQ(result[0].id, a.id);
+  EXPECT_THROW(app.complete(other.id), std::runtime_error);
+  EXPECT_THROW(app.mySchedule("bad"), std::invalid_argument);
+  EXPECT_TRUE(app.mySchedule("2026-10-20").empty());
+}
+TEST_F(Core, DailyCountsAndCompletion) {
+  reception();
+  auto p = patient();
+  auto a = app.book(p.id, 1, "2026-10-19", "09:00");
+  auto b = app.book(p.id, 1, "2026-10-19", "09:15");
+  app.book(p.id, 1, "2026-10-19", "09:30");
+  app.cancel(b.id);
+  app.logout();
+  app.login("doctor", "TestPass123");
+  app.complete(a.id);
+  EXPECT_THROW(app.complete(a.id), std::runtime_error);
+  app.logout();
+  app.login("admin", "TestPass123");
+  auto r = app.dailyReport("2026-10-19");
+  EXPECT_EQ(r.totalBooked, 3);
+  EXPECT_EQ(r.scheduled, 1);
+  EXPECT_EQ(r.canceled, 1);
+  EXPECT_EQ(r.completed, 1);
+  EXPECT_EQ(app.dailyReport("2026-10-20").totalBooked, 0);
+  app.logout();
+  reception();
+  EXPECT_THROW(app.cancel(a.id), std::runtime_error);
+}
+TEST_F(Core, ReportContents) {
+  reception();
+  auto p =
+      app.registerPatient("Demo, \"Quoted\"", 29, "Other", "9000000002", "O+");
+  app.book(p.id, 1, "2026-10-19", "09:00");
+  app.logout();
+  app.login("admin", "TestPass123");
+  TempDirectory temp;
+  app.exportPatients((temp.path / "patients.csv").string());
+  app.exportPatients((temp.path / "patients.txt").string());
+  app.exportDaily("2026-10-19", (temp.path / "daily.csv").string());
+  app.exportDaily("2026-10-19", (temp.path / "daily.txt").string());
+  EXPECT_NE(
+      readFile(temp.path / "patients.csv").find("\"Demo, \"\"Quoted\"\"\""),
+      std::string::npos);
+  EXPECT_NE(readFile(temp.path / "patients.txt").find(p.id), std::string::npos);
+  EXPECT_NE(readFile(temp.path / "daily.csv").find("2026-10-19,1,1,0,0"),
+            std::string::npos);
+  EXPECT_NE(
+      readFile(temp.path / "daily.txt").find("2026-10-19 | 1 | 1 | 0 | 0"),
+      std::string::npos);
+}
+TEST_F(Core, ReportErrorsAndPermissions) {
+  TempDirectory temp;
+  auto path = (temp.path / "patients.csv").string();
+  reception();
+  EXPECT_THROW(app.exportPatients(path), std::runtime_error);
+  EXPECT_THROW(app.dailyReport("2026-10-19"), std::runtime_error);
+  EXPECT_THROW(app.exportDaily("2026-10-19", path), std::runtime_error);
+  EXPECT_FALSE(std::filesystem::exists(path));
+  app.logout();
+  app.login("admin", "TestPass123");
+  EXPECT_THROW(app.exportPatients((temp.path / "wrong.db").string()),
+               std::invalid_argument);
+  std::filesystem::create_directory(temp.path / "blocked.csv");
+  EXPECT_THROW(app.exportPatients((temp.path / "blocked.csv").string()),
+               std::runtime_error);
+}
+TEST_F(Core, AvailabilityUpdates) {
+  reception();
+  auto p = patient();
+  app.book(p.id, 1, "2026-10-19", "09:00");
+  app.logout();
+  app.login("admin", "TestPass123");
+  EXPECT_THROW(app.setAvailability(1, 1, "10:00", "17:00"), std::runtime_error);
+  EXPECT_THROW(app.setAvailability(1, 7, "09:00", "17:00"),
+               std::invalid_argument);
+  EXPECT_THROW(app.setAvailability(1, 1, "17:00", "09:00"),
+               std::invalid_argument);
+  EXPECT_NO_THROW(app.setAvailability(1, 1, "09:00", "12:00"));
+}
+TEST_F(Core, TC_NFR_01) {
+  reception();
+  {
+    hms::Transaction tx(db);
+    for (int i = 0; i < 10000; ++i) {
+      auto q = db.prepare(
+          "INSERT INTO patients(public_id,name,age,gender,contact,blood_group) "
+          "VALUES(?,?,29,'Other','9000000002','O+')");
+      q.bind(1, "PERF" + std::to_string(i));
+      q.bind(2, "Performance Patient " + std::to_string(i));
+      q.step();
+    }
+    tx.commit();
+  }
+  auto start = std::chrono::steady_clock::now();
+  auto result = app.searchPatients("Performance Patient");
+  auto seconds =
+      std::chrono::duration<double>(std::chrono::steady_clock::now() - start)
+          .count();
+  EXPECT_EQ(result.size(), 10000u);
+  EXPECT_LT(seconds, 2.0);
+  RecordProperty("query_seconds", seconds);
+}
+TEST_F(Core, TC_NFR_02) {
+  // The external Valgrind invocation supplies the leak verdict for this
+  // workflow.
+  reception();
+  auto p = patient();
+  auto a = app.book(p.id, 1, "2026-10-19", "09:00");
+  app.reschedule(a.id, "2026-10-19", "09:15");
+  app.cancel(a.id);
+  app.logout();
+  EXPECT_FALSE(app.session());
+}
+TEST(Recovery, MissingDatabaseAndPersistence) {
+  TempDirectory temp;
+  auto path = (temp.path / "nested" / "hms.db").string();
+  {
+    hms::Database db(path);
+    hms::HMS app(db);
+    app.bootstrap("admin", "TestPass123");
+    app.login("admin", "TestPass123");
+    app.provision("reception", "TestPass123", "Receptionist");
+    app.logout();
+    app.login("reception", "TestPass123");
+    app.registerPatient("Persistent Patient", 45, "Male", "9000000009", "AB+");
+  }
+  {
+    hms::Database db(path);
+    hms::HMS app(db);
+    ASSERT_TRUE(app.login("reception", "TestPass123"));
+    auto result = app.searchPatients("P000001");
+    ASSERT_EQ(result.size(), 1u);
+    EXPECT_EQ(result[0].name, "Persistent Patient");
+  }
 }
