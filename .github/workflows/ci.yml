@@ -1,0 +1,21 @@
+name: HMS build and verification
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y cmake g++ libsqlite3-dev libssl-dev libgtest-dev cppcheck valgrind python3-pexpect time
+      - name: Configure and build
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build --parallel 2
+      - name: Tests
+        run: ctest --test-dir build --output-on-failure
+      - name: Static analysis
+        run: cppcheck --enable=warning,performance,portability --error-exitcode=1 --std=c++17 --inline-suppr -I include src
+      - name: Memory checks
+        run: valgrind --leak-check=full --show-leak-kinds=definite --errors-for-leak-kinds=definite --error-exitcode=1 build/hms_tests
