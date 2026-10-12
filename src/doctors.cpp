@@ -54,6 +54,18 @@ void HMS::setAvailability(int id, int day, const std::string &start,
   if (day < 0 || day > 6 || a >= b || a % 15 != 0 || b % 15 != 0)
     throw std::invalid_argument(
         "Use weekday 0-6 and increasing 15-minute boundaries");
+  Transaction tx(db_);
+  auto existing = db_.prepare(
+      "SELECT appt_time FROM appointments WHERE doctor_id=? AND "
+      "CAST(strftime('%w',appt_date) AS INTEGER)=? AND status='Scheduled'");
+  existing.bind(1, id);
+  existing.bind(2, day);
+  while (existing.step()) {
+    const int at = minutes(existing.text(0));
+    if (at < a || at + 15 > b)
+      throw std::runtime_error(
+          "New availability would exclude an existing appointment");
+  }
   auto q = db_.prepare(
       "INSERT INTO availability VALUES(?,?,?,?) ON CONFLICT(doctor_id,weekday) "
       "DO UPDATE SET start_min=excluded.start_min,end_min=excluded.end_min");
@@ -62,6 +74,7 @@ void HMS::setAvailability(int id, int day, const std::string &start,
   q.bind(3, a);
   q.bind(4, b);
   q.step();
+  tx.commit();
 }
 std::vector<Doctor> HMS::doctors(const std::string &spec) {
   require({"Admin", "Receptionist"});
