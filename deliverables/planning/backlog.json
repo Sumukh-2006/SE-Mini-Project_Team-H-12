@@ -1,0 +1,729 @@
+[
+  {
+    "id": "FR-AUTH-01",
+    "title": "allow users to log in using a unique username and password.",
+    "requirement": "The system shall allow users to log in using a unique username and password.",
+    "owner": "Sumukh Shandilya",
+    "sprint": 1,
+    "story_points": 5,
+    "priority": "High",
+    "dependencies": [],
+    "acceptance_criteria": [
+      "The system shall allow users to log in using a unique username and password.",
+      "Verification: Core.TC_AUTH_01"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "Core.TC_AUTH_01"
+  },
+  {
+    "id": "FR-AUTH-02",
+    "title": "support three distinct roles: Admin, Receptionist, and Doctor.",
+    "requirement": "The system shall support three distinct roles: Admin, Receptionist, and Doctor.",
+    "owner": "Sumukh Shandilya",
+    "sprint": 1,
+    "story_points": 3,
+    "priority": "High",
+    "dependencies": [],
+    "acceptance_criteria": [
+      "The system shall support three distinct roles: Admin, Receptionist, and Doctor.",
+      "Verification: Core.RolesEnforcedInServices"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "Core.RolesEnforcedInServices"
+  },
+  {
+    "id": "FR-AUTH-03",
+    "title": "deny access to unauthorized users after three incorrect login attempts.",
+    "requirement": "The system shall deny access to unauthorized users after three incorrect login attempts.",
+    "owner": "Sumukh Shandilya",
+    "sprint": 1,
+    "story_points": 3,
+    "priority": "High",
+    "dependencies": [],
+    "acceptance_criteria": [
+      "The system shall deny access to unauthorized users after three incorrect login attempts.",
+      "Verification: Core.TC_AUTH_02"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "Core.TC_AUTH_02"
+  },
+  {
+    "id": "FR-AUTH-04",
+    "title": "enforce session termination upon explicit user logout.",
+    "requirement": "The system shall enforce session termination upon explicit user logout.",
+    "owner": "Sumukh Shandilya",
+    "sprint": 1,
+    "story_points": 2,
+    "priority": "High",
+    "dependencies": [],
+    "acceptance_criteria": [
+      "The system shall enforce session termination upon explicit user logout.",
+      "Verification: Core.TC_AUTH_03"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "Core.TC_AUTH_03"
+  },
+  {
+    "id": "FR-PAT-01",
+    "title": "allow Receptionists to register a new patient with Name, Age, Gender, Contact, and Blood Group.",
+    "requirement": "The system shall allow Receptionists to register a new patient with Name, Age, Gender, Contact, and Blood Group.",
+    "owner": "Supreeth K",
+    "sprint": 1,
+    "story_points": 3,
+    "priority": "High",
+    "dependencies": [
+      "DEV-BUILD",
+      "FR-AUTH-02"
+    ],
+    "acceptance_criteria": [
+      "The system shall allow Receptionists to register a new patient with Name, Age, Gender, Contact, and Blood Group.",
+      "Verification: Core.TC_PAT_01"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "Core.TC_PAT_01"
+  },
+  {
+    "id": "FR-PAT-02",
+    "title": "generate a unique alphanumeric Patient ID upon successful registration.",
+    "requirement": "The system shall generate a unique alphanumeric Patient ID upon successful registration.",
+    "owner": "Supreeth K",
+    "sprint": 1,
+    "story_points": 2,
+    "priority": "High",
+    "dependencies": [
+      "DEV-BUILD",
+      "FR-AUTH-02",
+      "FR-PAT-01"
+    ],
+    "acceptance_criteria": [
+      "The system shall generate a unique alphanumeric Patient ID upon successful registration.",
+      "Verification: Core.PatientValidationAndUniqueIds"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "Core.PatientValidationAndUniqueIds"
+  },
+  {
+    "id": "FR-PAT-03",
+    "title": "allow Receptionists and Doctors to search for a patient by Patient ID or Name.",
+    "requirement": "The system shall allow Receptionists and Doctors to search for a patient by Patient ID or Name.",
+    "owner": "Supreeth K",
+    "sprint": 1,
+    "story_points": 3,
+    "priority": "High",
+    "dependencies": [
+      "DEV-BUILD",
+      "FR-AUTH-02",
+      "FR-PAT-01"
+    ],
+    "acceptance_criteria": [
+      "The system shall allow Receptionists and Doctors to search for a patient by Patient ID or Name.",
+      "Verification: Core.TC_PAT_02; Core.TC_PAT_03; Core.SearchByNameAndLiteralWildcards"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "Core.TC_PAT_02; Core.TC_PAT_03; Core.SearchByNameAndLiteralWildcards"
+  },
+  {
+    "id": "FR-PAT-04",
+    "title": "allow Receptionists to update patient contact details.",
+    "requirement": "The system shall allow Receptionists to update patient contact details.",
+    "owner": "Supreeth K",
+    "sprint": 2,
+    "story_points": 2,
+    "priority": "Medium",
+    "dependencies": [
+      "DEV-BUILD",
+      "FR-AUTH-02",
+      "FR-PAT-01"
+    ],
+    "acceptance_criteria": [
+      "The system shall allow Receptionists to update patient contact details.",
+      "Verification: Core.UpdateContact"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "Core.UpdateContact"
+  },
+  {
+    "id": "FR-DOC-01",
+    "title": "allow Admins to add new doctors with Name, Specialization, and Contact Info.",
+    "requirement": "The system shall allow Admins to add new doctors with Name, Specialization, and Contact Info.",
+    "owner": "Shashank K",
+    "sprint": 1,
+    "story_points": 3,
+    "priority": "High",
+    "dependencies": [
+      "DEV-BUILD",
+      "FR-AUTH-02"
+    ],
+    "acceptance_criteria": [
+      "The system shall allow Admins to add new doctors with Name, Specialization, and Contact Info.",
+      "Verification: Core.TC_DOC_01"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "Core.TC_DOC_01"
+  },
+  {
+    "id": "FR-DOC-02",
+    "title": "generate a unique Doctor ID upon registration.",
+    "requirement": "The system shall generate a unique Doctor ID upon registration.",
+    "owner": "Shashank K",
+    "sprint": 1,
+    "story_points": 2,
+    "priority": "High",
+    "dependencies": [
+      "DEV-BUILD",
+      "FR-AUTH-02",
+      "FR-DOC-01"
+    ],
+    "acceptance_criteria": [
+      "The system shall generate a unique Doctor ID upon registration.",
+      "Verification: Core.TC_DOC_01"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "Core.TC_DOC_01"
+  },
+  {
+    "id": "FR-DOC-03",
+    "title": "allow Admins to configure a doctor's weekly available hours.",
+    "requirement": "The system shall allow Admins to configure a doctor's weekly available hours.",
+    "owner": "Shashank K",
+    "sprint": 1,
+    "story_points": 5,
+    "priority": "High",
+    "dependencies": [
+      "DEV-BUILD",
+      "FR-AUTH-02",
+      "FR-DOC-01"
+    ],
+    "acceptance_criteria": [
+      "The system shall allow Admins to configure a doctor's weekly available hours.",
+      "Verification: Core.AvailabilityAndCalendarValidation; Core.AvailabilityUpdates"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "Core.AvailabilityAndCalendarValidation; Core.AvailabilityUpdates"
+  },
+  {
+    "id": "FR-DOC-04",
+    "title": "allow Receptionists to view a list of all doctors filtered by Specialization.",
+    "requirement": "The system shall allow Receptionists to view a list of all doctors filtered by Specialization.",
+    "owner": "Shashank K",
+    "sprint": 1,
+    "story_points": 3,
+    "priority": "High",
+    "dependencies": [
+      "DEV-BUILD",
+      "FR-AUTH-02",
+      "FR-DOC-01"
+    ],
+    "acceptance_criteria": [
+      "The system shall allow Receptionists to view a list of all doctors filtered by Specialization.",
+      "Verification: Core.TC_DOC_02"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "Core.TC_DOC_02"
+  },
+  {
+    "id": "FR-APP-01",
+    "title": "allow Receptionists to book an appointment by providing Patient ID, Doctor ID, Date, and Time.",
+    "requirement": "The system shall allow Receptionists to book an appointment by providing Patient ID, Doctor ID, Date, and Time.",
+    "owner": "Shashank K",
+    "sprint": 1,
+    "story_points": 5,
+    "priority": "High",
+    "dependencies": [
+      "DEV-BUILD",
+      "FR-AUTH-02",
+      "FR-PAT-01",
+      "FR-DOC-03"
+    ],
+    "acceptance_criteria": [
+      "The system shall allow Receptionists to book an appointment by providing Patient ID, Doctor ID, Date, and Time.",
+      "Verification: Core.TC_APP_01"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "Core.TC_APP_01"
+  },
+  {
+    "id": "FR-APP-02",
+    "title": "reject appointment bookings if the doctor is unavailable or already booked for the specified time.",
+    "requirement": "The system shall reject appointment bookings if the doctor is unavailable or already booked for the specified time.",
+    "owner": "Shashank K",
+    "sprint": 1,
+    "story_points": 5,
+    "priority": "High",
+    "dependencies": [
+      "DEV-BUILD",
+      "FR-AUTH-02",
+      "FR-PAT-01",
+      "FR-DOC-03"
+    ],
+    "acceptance_criteria": [
+      "The system shall reject appointment bookings if the doctor is unavailable or already booked for the specified time.",
+      "Verification: Core.TC_APP_02; Core.AvailabilityAndCalendarValidation"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "Core.TC_APP_02; Core.AvailabilityAndCalendarValidation"
+  },
+  {
+    "id": "FR-APP-03",
+    "title": "allow Receptionists to cancel an existing appointment using the Appointment ID.",
+    "requirement": "The system shall allow Receptionists to cancel an existing appointment using the Appointment ID.",
+    "owner": "Shashank K",
+    "sprint": 2,
+    "story_points": 2,
+    "priority": "Medium",
+    "dependencies": [
+      "DEV-BUILD",
+      "FR-AUTH-02",
+      "FR-PAT-01",
+      "FR-DOC-03"
+    ],
+    "acceptance_criteria": [
+      "The system shall allow Receptionists to cancel an existing appointment using the Appointment ID.",
+      "Verification: Core.TC_APP_03"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "Core.TC_APP_03"
+  },
+  {
+    "id": "FR-APP-04",
+    "title": "allow Receptionists to reschedule an appointment, subject to doctor availability.",
+    "requirement": "The system shall allow Receptionists to reschedule an appointment, subject to doctor availability.",
+    "owner": "Shashank K",
+    "sprint": 2,
+    "story_points": 5,
+    "priority": "Medium",
+    "dependencies": [
+      "DEV-BUILD",
+      "FR-AUTH-02",
+      "FR-PAT-01",
+      "FR-DOC-03"
+    ],
+    "acceptance_criteria": [
+      "The system shall allow Receptionists to reschedule an appointment, subject to doctor availability.",
+      "Verification: Core.RescheduleIsAtomic"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "Core.RescheduleIsAtomic"
+  },
+  {
+    "id": "FR-APP-05",
+    "title": "allow Doctors to view their scheduled appointments for a specific date.",
+    "requirement": "The system shall allow Doctors to view their scheduled appointments for a specific date.",
+    "owner": "Shashank K",
+    "sprint": 2,
+    "story_points": 3,
+    "priority": "Medium",
+    "dependencies": [
+      "DEV-BUILD",
+      "FR-AUTH-02",
+      "FR-PAT-01",
+      "FR-DOC-03"
+    ],
+    "acceptance_criteria": [
+      "The system shall allow Doctors to view their scheduled appointments for a specific date.",
+      "Verification: Core.DoctorsSeeOnlyOwnSchedule"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "Core.DoctorsSeeOnlyOwnSchedule"
+  },
+  {
+    "id": "FR-REP-01",
+    "title": "allow Admins to generate a daily report of total appointments booked, canceled, and completed.",
+    "requirement": "The system shall allow Admins to generate a daily report of total appointments booked, canceled, and completed.",
+    "owner": "Shashank D",
+    "sprint": 2,
+    "story_points": 3,
+    "priority": "Medium",
+    "dependencies": [
+      "DEV-BUILD",
+      "FR-AUTH-02",
+      "FR-APP-01",
+      "DEV-COMPLETE"
+    ],
+    "acceptance_criteria": [
+      "The system shall allow Admins to generate a daily report of total appointments booked, canceled, and completed.",
+      "Verification: Core.DailyCountsAndCompletion"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "Core.DailyCountsAndCompletion"
+  },
+  {
+    "id": "FR-REP-02",
+    "title": "allow Admins to generate a report of all registered patients.",
+    "requirement": "The system shall allow Admins to generate a report of all registered patients.",
+    "owner": "Shashank D",
+    "sprint": 2,
+    "story_points": 3,
+    "priority": "Medium",
+    "dependencies": [
+      "DEV-BUILD",
+      "FR-AUTH-02",
+      "FR-APP-01"
+    ],
+    "acceptance_criteria": [
+      "The system shall allow Admins to generate a report of all registered patients.",
+      "Verification: Core.ReportContents"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "Core.ReportContents"
+  },
+  {
+    "id": "FR-REP-03",
+    "title": "export reports as basic text/CSV files to the local disk.",
+    "requirement": "The system shall export reports as basic text/CSV files to the local disk.",
+    "owner": "Shashank D",
+    "sprint": 2,
+    "story_points": 3,
+    "priority": "Medium",
+    "dependencies": [
+      "DEV-BUILD",
+      "FR-AUTH-02",
+      "FR-APP-01"
+    ],
+    "acceptance_criteria": [
+      "The system shall export reports as basic text/CSV files to the local disk.",
+      "Verification: Core.ReportContents; Core.ReportErrorsAndPermissions"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "Core.ReportContents; Core.ReportErrorsAndPermissions"
+  },
+  {
+    "id": "NFR-PERF-01",
+    "title": "process queries and display results within 2 seconds for a database of up to 10,000 records.",
+    "requirement": "The system shall process queries and display results within 2 seconds for a database of up to 10,000 records.",
+    "owner": "Shashank D",
+    "sprint": 2,
+    "story_points": 3,
+    "priority": "Medium",
+    "dependencies": [
+      "DEV-BUILD",
+      "FR-AUTH-02"
+    ],
+    "acceptance_criteria": [
+      "The system shall process queries and display results within 2 seconds for a database of up to 10,000 records.",
+      "Verification: Core.TC_NFR_01"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "Core.TC_NFR_01"
+  },
+  {
+    "id": "NFR-PERF-02",
+    "title": "The system footprint shall not exceed 50 MB in RAM during normal operations.",
+    "requirement": "The system footprint shall not exceed 50 MB in RAM during normal operations.",
+    "owner": "Shashank D",
+    "sprint": 2,
+    "story_points": 3,
+    "priority": "Medium",
+    "dependencies": [
+      "DEV-BUILD",
+      "FR-AUTH-02"
+    ],
+    "acceptance_criteria": [
+      "The system footprint shall not exceed 50 MB in RAM during normal operations.",
+      "Verification: tests/system_checks.py: normal process RSS"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "tests/system_checks.py: normal process RSS"
+  },
+  {
+    "id": "NFR-REL-01",
+    "title": "prevent data corruption in the event of an abrupt application crash (ACID compliance via SQLite).",
+    "requirement": "The system shall prevent data corruption in the event of an abrupt application crash (ACID compliance via SQLite).",
+    "owner": "Shashank K",
+    "sprint": 1,
+    "story_points": 5,
+    "priority": "High",
+    "dependencies": [
+      "DEV-BUILD",
+      "FR-AUTH-02"
+    ],
+    "acceptance_criteria": [
+      "The system shall prevent data corruption in the event of an abrupt application crash (ACID compliance via SQLite).",
+      "Verification: tests/system_checks.py: abrupt process termination"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "tests/system_checks.py: abrupt process termination"
+  },
+  {
+    "id": "NFR-REL-02",
+    "title": "handle missing data files gracefully by creating necessary empty files on startup.",
+    "requirement": "The application shall handle missing data files gracefully by creating necessary empty files on startup.",
+    "owner": "Shashank K",
+    "sprint": 1,
+    "story_points": 3,
+    "priority": "High",
+    "dependencies": [
+      "DEV-BUILD",
+      "FR-AUTH-02"
+    ],
+    "acceptance_criteria": [
+      "The application shall handle missing data files gracefully by creating necessary empty files on startup.",
+      "Verification: Recovery.MissingDatabaseAndPersistence"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "Recovery.MissingDatabaseAndPersistence"
+  },
+  {
+    "id": "SEC-REQ-01",
+    "title": "Passwords shall not be stored in plain text (must be hashed, e.g., SHA-256).",
+    "requirement": "Passwords shall not be stored in plain text (must be hashed, e.g., SHA-256).",
+    "owner": "Sumukh Shandilya",
+    "sprint": 1,
+    "story_points": 5,
+    "priority": "High",
+    "dependencies": [
+      "DEV-BUILD",
+      "FR-AUTH-02"
+    ],
+    "acceptance_criteria": [
+      "Passwords shall not be stored in plain text (must be hashed, e.g., SHA-256).",
+      "Verification: Core.HashesAreSaltedAndNeverPlaintext"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "Core.HashesAreSaltedAndNeverPlaintext"
+  },
+  {
+    "id": "SEC-REQ-02",
+    "title": "use parameterized queries for all SQLite interactions to prevent SQL Injection.",
+    "requirement": "The system shall use parameterized queries for all SQLite interactions to prevent SQL Injection.",
+    "owner": "Sumukh Shandilya",
+    "sprint": 1,
+    "story_points": 3,
+    "priority": "High",
+    "dependencies": [
+      "DEV-BUILD",
+      "FR-AUTH-02"
+    ],
+    "acceptance_criteria": [
+      "The system shall use parameterized queries for all SQLite interactions to prevent SQL Injection.",
+      "Verification: Core.TC_SEC_01; Core.SearchByNameAndLiteralWildcards"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "Core.TC_SEC_01; Core.SearchByNameAndLiteralWildcards"
+  },
+  {
+    "id": "SEC-REQ-03",
+    "title": "Role-based access checks shall occur server/backend-side before executing any sensitive operation.",
+    "requirement": "Role-based access checks shall occur server/backend-side before executing any sensitive operation.",
+    "owner": "Sumukh Shandilya",
+    "sprint": 1,
+    "story_points": 5,
+    "priority": "High",
+    "dependencies": [
+      "DEV-BUILD",
+      "FR-AUTH-02"
+    ],
+    "acceptance_criteria": [
+      "Role-based access checks shall occur server/backend-side before executing any sensitive operation.",
+      "Verification: Core.RolesEnforcedInServices; Core.ReportErrorsAndPermissions"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "Core.RolesEnforcedInServices; Core.ReportErrorsAndPermissions"
+  },
+  {
+    "id": "NFR-MAINT-01",
+    "title": "be documented using Doxygen-style comments.",
+    "requirement": "The source code shall be documented using Doxygen-style comments.",
+    "owner": "Shashank D",
+    "sprint": 2,
+    "story_points": 1,
+    "priority": "Medium",
+    "dependencies": [
+      "DEV-BUILD",
+      "FR-AUTH-02"
+    ],
+    "acceptance_criteria": [
+      "The source code shall be documented using Doxygen-style comments.",
+      "Verification: include/hms/*.hpp: Doxygen comments; docs/Part2/Architecture.md"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "include/hms/*.hpp: Doxygen comments; docs/Part2/Architecture.md"
+  },
+  {
+    "id": "NFR-MAINT-02",
+    "title": "Memory leaks shall be verified as zero using Valgrind before release.",
+    "requirement": "Memory leaks shall be verified as zero using Valgrind before release.",
+    "owner": "Shashank D",
+    "sprint": 2,
+    "story_points": 3,
+    "priority": "Medium",
+    "dependencies": [
+      "DEV-BUILD",
+      "FR-AUTH-02"
+    ],
+    "acceptance_criteria": [
+      "Memory leaks shall be verified as zero using Valgrind before release.",
+      "Verification: Valgrind hms_tests and real console workflow"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "Valgrind hms_tests and real console workflow"
+  },
+  {
+    "id": "DEV-BUILD",
+    "title": "Reproducible C++17 CMake build",
+    "requirement": "Supporting deliverable",
+    "owner": "Shashank K",
+    "sprint": 1,
+    "story_points": 3,
+    "priority": "High",
+    "dependencies": [],
+    "acceptance_criteria": [
+      "Configure, compile and run in Ubuntu 24.04 with SQLite and OpenSSL"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "See delivery checklist"
+  },
+  {
+    "id": "DEV-CI",
+    "title": "Prepare pull-request and push checks",
+    "requirement": "Supporting deliverable",
+    "owner": "Sumukh Shandilya",
+    "sprint": 1,
+    "story_points": 3,
+    "priority": "High",
+    "dependencies": [
+      "DEV-BUILD"
+    ],
+    "acceptance_criteria": [
+      "Build, tests, console checks, cppcheck, and Valgrind workflow files ready; hosted run pending publication"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "See delivery checklist"
+  },
+  {
+    "id": "DEV-TEST",
+    "title": "Automated tests and console verification",
+    "requirement": "Supporting deliverable",
+    "owner": "Shashank D",
+    "sprint": 1,
+    "story_points": 5,
+    "priority": "High",
+    "dependencies": [
+      "DEV-BUILD"
+    ],
+    "acceptance_criteria": [
+      "GoogleTest and real PTY workflow tests execute against the actual application"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "See delivery checklist"
+  },
+  {
+    "id": "DEV-USER",
+    "title": "First-run and administrator user provisioning",
+    "requirement": "Supporting deliverable",
+    "owner": "Sumukh Shandilya",
+    "sprint": 1,
+    "story_points": 3,
+    "priority": "High",
+    "dependencies": [
+      "DEV-BUILD"
+    ],
+    "acceptance_criteria": [
+      "First run can create only the initial administrator; only authenticated admins add subsequent users"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "See delivery checklist"
+  },
+  {
+    "id": "DEV-COMPLETE",
+    "title": "Doctor marks a consultation completed",
+    "requirement": "Supporting deliverable",
+    "owner": "Shashank K",
+    "sprint": 2,
+    "story_points": 2,
+    "priority": "High",
+    "dependencies": [
+      "DEV-BUILD"
+    ],
+    "acceptance_criteria": [
+      "Only the linked doctor can transition their Scheduled appointment to Completed"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "See delivery checklist"
+  },
+  {
+    "id": "GITHUB-BOARD",
+    "title": "Create and link the shared GitHub Project",
+    "requirement": "Supporting deliverable",
+    "owner": "Sumukh Shandilya",
+    "sprint": 1,
+    "story_points": 2,
+    "priority": "High",
+    "dependencies": [
+      "DEV-BUILD"
+    ],
+    "acceptance_criteria": [
+      "After publication approval, create board with points, assignees, priorities, sprint fields and views"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "See delivery checklist"
+  },
+  {
+    "id": "DOC-PACKAGE",
+    "title": "Finalize versioned documents and traceability",
+    "requirement": "Supporting deliverable",
+    "owner": "Supreeth K",
+    "sprint": 2,
+    "story_points": 1,
+    "priority": "High",
+    "dependencies": [
+      "DEV-BUILD"
+    ],
+    "acceptance_criteria": [
+      "Version 1.1 SRS, architecture, test plan and full requirement mappings available; preserve v1.0"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "See delivery checklist"
+  },
+  {
+    "id": "DEMO-1",
+    "title": "Record the 60-second Sprint-1 product demo",
+    "requirement": "Supporting deliverable",
+    "owner": "Sumukh Shandilya",
+    "sprint": 1,
+    "story_points": 2,
+    "priority": "High",
+    "dependencies": [
+      "DEV-BUILD"
+    ],
+    "acceptance_criteria": [
+      "Actual Sprint-1 console output captured with captions and verified 60-second duration"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "See delivery checklist"
+  },
+  {
+    "id": "DEMO-2",
+    "title": "Record the 120-second final product demo",
+    "requirement": "Supporting deliverable",
+    "owner": "Sumukh Shandilya",
+    "sprint": 2,
+    "story_points": 2,
+    "priority": "High",
+    "dependencies": [
+      "DEV-BUILD"
+    ],
+    "acceptance_criteria": [
+      "Actual final console output captured with captions and verified 120-second duration"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "See delivery checklist"
+  },
+  {
+    "id": "REL-FREEZE",
+    "title": "Prepare the development freeze and release checklist",
+    "requirement": "Supporting deliverable",
+    "owner": "Shashank D",
+    "sprint": 2,
+    "story_points": 1,
+    "priority": "High",
+    "dependencies": [
+      "DEV-BUILD"
+    ],
+    "acceptance_criteria": [
+      "Local verification complete; hosted evidence and owner approval remain pending until performed"
+    ],
+    "status": "Prepared locally; not published",
+    "tests": "See delivery checklist"
+  }
+]

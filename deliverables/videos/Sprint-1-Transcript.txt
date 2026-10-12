@@ -1,0 +1,76 @@
+Hospital Management System | Sprint 1
+15-minute appointment slots | Local SQLite storage
+Username (q to quit): reception
+Password: [hidden]
+
+Welcome, reception
+
+Receptionist menu
+1 Register patient
+2 Search patients
+3 Filter doctors
+4 Book appointment
+0 Logout
+Choice: 1
+Patient name: Taylor Demo
+Age: 31
+Gender (Male/Female/Other): Female
+Contact: 9000000004
+Blood group: A+
+Patient registered. Patient ID: P000002
+
+Receptionist menu
+1 Register patient
+2 Search patients
+3 Filter doctors
+4 Book appointment
+0 Logout
+Choice: 2
+Patient ID or name: P000002
+P000002 | Taylor Demo | age 31 | Female | 9000000004 | A+
+
+Receptionist menu
+1 Register patient
+2 Search patients
+3 Filter doctors
+4 Book appointment
+0 Logout
+Choice: 3
+Specialization (blank for all): Cardiologist
+1 | Dr Mira Rao | Cardiologist
+
+Receptionist menu
+1 Register patient
+2 Search patients
+3 Filter doctors
+4 Book appointment
+0 Logout
+Choice: 4
+Patient ID: P000001
+Doctor ID: 1
+Date (YYYY-MM-DD): 2026-10-19
+Time (HH:MM): 09:00
+Appointment booked. Appointment ID: 1 | 2026-10-19 09:00 | Scheduled
+
+Receptionist menu
+1 Register patient
+2 Search patients
+3 Filter doctors
+4 Book appointment
+0 Logout
+Choice: 4
+Patient ID: P000001
+Doctor ID: 1
+Date (YYYY-MM-DD): 2026-10-19
+Time (HH:MM): 09:00
+Error: Doctor unavailable or slot already booked
+
+Receptionist menu
+1 Register patient
+2 Search patients
+3 Filter doctors
+4 Book appointment
+0 Logout
+Choice: 0
+Logged out
+Username (q to quit): q

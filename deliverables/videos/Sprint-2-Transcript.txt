@@ -1,0 +1,180 @@
+Hospital Management System | Version 1.1
+15-minute appointment slots | Local SQLite storage
+Username (q to quit): reception
+Password: [hidden]
+
+Welcome, reception
+
+Receptionist menu
+1 Register patient
+2 Search patients
+3 Filter doctors
+4 Book appointment
+5 Update patient contact
+6 Cancel appointment
+7 Reschedule appointment
+0 Logout
+Choice: 5
+Patient ID: P000001
+New contact: 9000000005
+Patient contact updated
+
+Receptionist menu
+1 Register patient
+2 Search patients
+3 Filter doctors
+4 Book appointment
+5 Update patient contact
+6 Cancel appointment
+7 Reschedule appointment
+0 Logout
+Choice: 4
+Patient ID: P000001
+Doctor ID: 1
+Date (YYYY-MM-DD): 2026-10-19
+Time (HH:MM): 09:00
+Appointment booked. Appointment ID: 1 | 2026-10-19 09:00 | Scheduled
+
+Receptionist menu
+1 Register patient
+2 Search patients
+3 Filter doctors
+4 Book appointment
+5 Update patient contact
+6 Cancel appointment
+7 Reschedule appointment
+0 Logout
+Choice: 4
+Patient ID: P000001
+Doctor ID: 1
+Date (YYYY-MM-DD): 2026-10-19
+Time (HH:MM): 09:15
+Appointment booked. Appointment ID: 2 | 2026-10-19 09:15 | Scheduled
+
+Receptionist menu
+1 Register patient
+2 Search patients
+3 Filter doctors
+4 Book appointment
+5 Update patient contact
+6 Cancel appointment
+7 Reschedule appointment
+0 Logout
+Choice: 7
+Appointment ID: 1
+New date (YYYY-MM-DD): 2026-10-19
+New time (HH:MM): 09:15
+Error: Doctor unavailable or slot already booked
+
+Receptionist menu
+1 Register patient
+2 Search patients
+3 Filter doctors
+4 Book appointment
+5 Update patient contact
+6 Cancel appointment
+7 Reschedule appointment
+0 Logout
+Choice: 7
+Appointment ID: 1
+New date (YYYY-MM-DD): 2026-10-19
+New time (HH:MM): 09:30
+Appointment rescheduled
+
+Receptionist menu
+1 Register patient
+2 Search patients
+3 Filter doctors
+4 Book appointment
+5 Update patient contact
+6 Cancel appointment
+7 Reschedule appointment
+0 Logout
+Choice: 6
+Appointment ID: 2
+Appointment canceled
+
+Receptionist menu
+1 Register patient
+2 Search patients
+3 Filter doctors
+4 Book appointment
+5 Update patient contact
+6 Cancel appointment
+7 Reschedule appointment
+0 Logout
+Choice: 0
+Logged out
+Username (q to quit): doctor
+Password: [hidden]
+
+Welcome, doctor
+
+Doctor menu
+1 Search patients
+2 My daily schedule
+3 Complete appointment
+0 Logout
+Choice: 2
+Date (YYYY-MM-DD): 2026-10-19
+1 | P000001 | Doctor 1 | 2026-10-19 09:30 | Scheduled
+
+Doctor menu
+1 Search patients
+2 My daily schedule
+3 Complete appointment
+0 Logout
+Choice: 3
+Appointment ID: 1
+Appointment completed
+
+Doctor menu
+1 Search patients
+2 My daily schedule
+3 Complete appointment
+0 Logout
+Choice: 0
+Logged out
+Username (q to quit): admin
+Password: [hidden]
+
+Welcome, admin
+
+Admin menu
+1 Add doctor
+2 Set weekly availability
+3 List doctors
+4 Create user account
+5 Daily appointment report
+6 Export patient report
+7 Export daily report
+0 Logout
+Choice: 5
+Date (YYYY-MM-DD): 2026-10-19
+Total booked: 2 | Scheduled: 0 | Canceled: 1 | Completed: 1
+
+Admin menu
+1 Add doctor
+2 Set weekly availability
+3 List doctors
+4 Create user account
+5 Daily appointment report
+6 Export patient report
+7 Export daily report
+0 Logout
+Choice: 6
+Output file (.csv or .txt): /tmp/hms-demo-yaksm3yk/patients.csv
+Patient report exported
+
+Admin menu
+1 Add doctor
+2 Set weekly availability
+3 List doctors
+4 Create user account
+5 Daily appointment report
+6 Export patient report
+7 Export daily report
+0 Logout
+Choice: 0
+Logged out
+Username (q to quit): q

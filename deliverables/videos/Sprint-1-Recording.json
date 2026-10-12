@@ -1,0 +1,37 @@
+{
+  "sprint": 1,
+  "duration_seconds": 60,
+  "checkpoint": "sprint-1-local",
+  "binary_sha256": "bef4e0d476d55a20f8e64439aa0001d1be17d5da1f3ba50ff71d1aca57fbc7d1",
+  "capture": "Real executable PTY output replayed with captions; scene hold durations edited for readability",
+  "scenes": [
+    {
+      "caption": "Receptionist login succeeds and opens the role-specific menu",
+      "seconds": 8
+    },
+    {
+      "caption": "Register a fictional patient and receive a unique patient ID",
+      "seconds": 12
+    },
+    {
+      "caption": "Search retrieves the persisted patient details",
+      "seconds": 8
+    },
+    {
+      "caption": "Filter the doctor directory by specialization",
+      "seconds": 8
+    },
+    {
+      "caption": "Book an available 15-minute appointment",
+      "seconds": 10
+    },
+    {
+      "caption": "The same doctor slot cannot be booked twice",
+      "seconds": 9
+    },
+    {
+      "caption": "Explicit logout destroys the session",
+      "seconds": 5
+    }
+  ]
+}

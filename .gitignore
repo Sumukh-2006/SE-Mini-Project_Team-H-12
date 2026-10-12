@@ -1,0 +1,8 @@
+build*/
+.local/
+*.db
+*.db-*
+*.sqlite*
+__pycache__/
+tmp/
+*.log
