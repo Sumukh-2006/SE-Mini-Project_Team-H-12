@@ -61,4 +61,16 @@ std::vector<Patient> HMS::searchPatients(const std::string &term) {
         {q.text(0), q.text(1), q.integer(2), q.text(3), q.text(4), q.text(5)});
   return result;
 }
+void HMS::updateContact(const std::string &id, const std::string &contact) {
+  require({"Receptionist"});
+  validateContact(contact);
+  auto found = db_.prepare("SELECT 1 FROM patients WHERE public_id=?");
+  found.bind(1, id);
+  if (!found.step())
+    throw std::runtime_error("Patient not found");
+  auto q = db_.prepare("UPDATE patients SET contact=? WHERE public_id=?");
+  q.bind(1, contact);
+  q.bind(2, id);
+  q.step();
+}
 } // namespace hms

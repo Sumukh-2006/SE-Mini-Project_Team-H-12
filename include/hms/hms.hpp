@@ -25,6 +25,10 @@ struct Session {
   std::string username, role;
   int doctorId;
 };
+/** Counts appointments by their current scheduled date and current status. */
+struct DailyReport {
+  int totalBooked, scheduled, canceled, completed;
+};
 
 /** Business layer. Session state is private; every sensitive operation checks
  * its role. */
@@ -59,6 +63,22 @@ public:
   std::vector<Doctor> doctors(const std::string &specialization);
   Appointment book(const std::string &patientId, int doctorId,
                    const std::string &date, const std::string &time);
+  /** Receptionist-only patient contact update. */
+  void updateContact(const std::string &patientId, const std::string &contact);
+  /** Receptionist-only cancellation and atomic rescheduling of Scheduled
+   * records. */
+  void cancel(int appointmentId);
+  void reschedule(int appointmentId, const std::string &date,
+                  const std::string &time);
+  /** Returns only the authenticated doctor's Scheduled appointments for the
+   * date. */
+  std::vector<Appointment> mySchedule(const std::string &date);
+  /** Linked doctor may complete only their own Scheduled appointment. */
+  void complete(int appointmentId);
+  /** Administrator-only daily totals and local CSV/text report exports. */
+  DailyReport dailyReport(const std::string &date);
+  void exportPatients(const std::string &path);
+  void exportDaily(const std::string &date, const std::string &path);
 };
 /** Shared validation runs in the business layer as well as interactive input
  * handling. */
