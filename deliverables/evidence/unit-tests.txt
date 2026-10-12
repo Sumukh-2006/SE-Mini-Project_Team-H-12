@@ -1,0 +1,71 @@
+Running main() from ./googletest/src/gtest_main.cc
+[==========] Running 29 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 28 tests from Core
+[ RUN      ] Core.TC_AUTH_01
+[       OK ] Core.TC_AUTH_01 (2 ms)
+[ RUN      ] Core.TC_AUTH_02
+[       OK ] Core.TC_AUTH_02 (0 ms)
+[ RUN      ] Core.TC_AUTH_03
+[       OK ] Core.TC_AUTH_03 (0 ms)
+[ RUN      ] Core.TC_PAT_01
+[       OK ] Core.TC_PAT_01 (0 ms)
+[ RUN      ] Core.TC_PAT_02
+[       OK ] Core.TC_PAT_02 (0 ms)
+[ RUN      ] Core.TC_PAT_03
+[       OK ] Core.TC_PAT_03 (0 ms)
+[ RUN      ] Core.TC_DOC_01
+[       OK ] Core.TC_DOC_01 (0 ms)
+[ RUN      ] Core.TC_DOC_02
+[       OK ] Core.TC_DOC_02 (0 ms)
+[ RUN      ] Core.TC_APP_01
+[       OK ] Core.TC_APP_01 (0 ms)
+[ RUN      ] Core.TC_APP_02
+[       OK ] Core.TC_APP_02 (0 ms)
+[ RUN      ] Core.TC_SEC_01
+[       OK ] Core.TC_SEC_01 (0 ms)
+[ RUN      ] Core.RolesEnforcedInServices
+[       OK ] Core.RolesEnforcedInServices (0 ms)
+[ RUN      ] Core.HashesAreSaltedAndNeverPlaintext
+[       OK ] Core.HashesAreSaltedAndNeverPlaintext (0 ms)
+[ RUN      ] Core.BootstrapCannotBypassAdmin
+[       OK ] Core.BootstrapCannotBypassAdmin (0 ms)
+[ RUN      ] Core.PatientValidationAndUniqueIds
+[       OK ] Core.PatientValidationAndUniqueIds (0 ms)
+[ RUN      ] Core.SearchByNameAndLiteralWildcards
+[       OK ] Core.SearchByNameAndLiteralWildcards (0 ms)
+[ RUN      ] Core.AvailabilityAndCalendarValidation
+[       OK ] Core.AvailabilityAndCalendarValidation (0 ms)
+[ RUN      ] Core.ForeignKeysAndDoctorLinks
+[       OK ] Core.ForeignKeysAndDoctorLinks (0 ms)
+[ RUN      ] Core.UpdateContact
+[       OK ] Core.UpdateContact (0 ms)
+[ RUN      ] Core.TC_APP_03
+[       OK ] Core.TC_APP_03 (0 ms)
+[ RUN      ] Core.RescheduleIsAtomic
+[       OK ] Core.RescheduleIsAtomic (0 ms)
+[ RUN      ] Core.DoctorsSeeOnlyOwnSchedule
+[       OK ] Core.DoctorsSeeOnlyOwnSchedule (0 ms)
+[ RUN      ] Core.DailyCountsAndCompletion
+[       OK ] Core.DailyCountsAndCompletion (0 ms)
+[ RUN      ] Core.ReportContents
+[       OK ] Core.ReportContents (2 ms)
+[ RUN      ] Core.ReportErrorsAndPermissions
+[       OK ] Core.ReportErrorsAndPermissions (0 ms)
+[ RUN      ] Core.AvailabilityUpdates
+[       OK ] Core.AvailabilityUpdates (0 ms)
+[ RUN      ] Core.TC_NFR_01
+[       OK ] Core.TC_NFR_01 (48 ms)
+[ RUN      ] Core.TC_NFR_02
+[       OK ] Core.TC_NFR_02 (0 ms)
+[----------] 28 tests from Core (66 ms total)
+
+[----------] 1 test from Recovery
+[ RUN      ] Recovery.MissingDatabaseAndPersistence
+[       OK ] Recovery.MissingDatabaseAndPersistence (21 ms)
+[----------] 1 test from Recovery (21 ms total)
+
+[----------] Global test environment tear-down
+[==========] 29 tests from 2 test suites ran. (88 ms total)
+[  PASSED  ] 29 tests.
+

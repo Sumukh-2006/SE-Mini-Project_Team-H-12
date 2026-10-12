@@ -1,0 +1,12 @@
+{
+  "query_record_count": 10000,
+  "query_wall_seconds": 0.055158427996502724,
+  "broad_query_and_display_seconds": 0.13595226100005675,
+  "normal_process_rss_kb": 10076,
+  "performance_limit_seconds": 2,
+  "rss_limit_kb": 51200,
+  "crash_recovery": "PASS: production DAL transaction rolled back after SIGKILL; database integrity ok",
+  "console_valgrind": "PASS: no errors and no definitely lost memory",
+  "environment": "Ubuntu 24.04 under WSL2, GCC 13.3, release build",
+  "limitations": "Single workstation measurement; not a multi-platform performance guarantee"
+}

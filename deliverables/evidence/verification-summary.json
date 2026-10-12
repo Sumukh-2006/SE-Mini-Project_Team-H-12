@@ -1,0 +1,67 @@
+{
+  "executed_at_utc": "2026-10-12T05:13:31.605603+00:00",
+  "environment": "Linux-6.18.40.1-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "tests": 29,
+  "failures": 0,
+  "errors": 0,
+  "checks": [
+    {
+      "check": "unit-tests",
+      "exit_code": 0,
+      "result": "PASS",
+      "command": [
+        "/mnt/c/Users/Shashank/.codex/.chatgpt-projects/g-p-6ac9a2734540819188fab92cbe1c7192/work/build/hms_tests",
+        "--gtest_output=xml:/mnt/c/Users/Shashank/.codex/.chatgpt-projects/g-p-6ac9a2734540819188fab92cbe1c7192/work/deliverables/evidence/final-tests.xml"
+      ]
+    },
+    {
+      "check": "console",
+      "exit_code": 0,
+      "result": "PASS",
+      "command": [
+        "/usr/bin/python3",
+        "/mnt/c/Users/Shashank/.codex/.chatgpt-projects/g-p-6ac9a2734540819188fab92cbe1c7192/work/tests/console_tests.py",
+        "/mnt/c/Users/Shashank/.codex/.chatgpt-projects/g-p-6ac9a2734540819188fab92cbe1c7192/work/build/hms_app"
+      ]
+    },
+    {
+      "check": "static-analysis",
+      "exit_code": 0,
+      "result": "PASS",
+      "command": [
+        "cppcheck",
+        "--enable=warning,performance,portability",
+        "--error-exitcode=1",
+        "--std=c++17",
+        "--inline-suppr",
+        "-I",
+        "/mnt/c/Users/Shashank/.codex/.chatgpt-projects/g-p-6ac9a2734540819188fab92cbe1c7192/work/include",
+        "/mnt/c/Users/Shashank/.codex/.chatgpt-projects/g-p-6ac9a2734540819188fab92cbe1c7192/work/src"
+      ]
+    },
+    {
+      "check": "valgrind",
+      "exit_code": 0,
+      "result": "PASS",
+      "command": [
+        "valgrind",
+        "--leak-check=full",
+        "--show-leak-kinds=definite",
+        "--errors-for-leak-kinds=definite",
+        "--error-exitcode=1",
+        "/mnt/c/Users/Shashank/.codex/.chatgpt-projects/g-p-6ac9a2734540819188fab92cbe1c7192/work/build/hms_tests"
+      ]
+    },
+    {
+      "check": "system",
+      "exit_code": 0,
+      "result": "PASS",
+      "command": [
+        "/usr/bin/python3",
+        "/mnt/c/Users/Shashank/.codex/.chatgpt-projects/g-p-6ac9a2734540819188fab92cbe1c7192/work/tests/system_checks.py",
+        "/mnt/c/Users/Shashank/.codex/.chatgpt-projects/g-p-6ac9a2734540819188fab92cbe1c7192/work/build/hms_app"
+      ]
+    }
+  ],
+  "remote_evidence": "Pending: no hosted CI, Project, issues, PRs, reviews, merges or uploads performed"
+}

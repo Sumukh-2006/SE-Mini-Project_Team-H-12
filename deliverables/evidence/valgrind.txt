@@ -1,0 +1,85 @@
+Running main() from ./googletest/src/gtest_main.cc
+[==========] Running 29 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 28 tests from Core
+[ RUN      ] Core.TC_AUTH_01
+[       OK ] Core.TC_AUTH_01 (766 ms)
+[ RUN      ] Core.TC_AUTH_02
+[       OK ] Core.TC_AUTH_02 (23 ms)
+[ RUN      ] Core.TC_AUTH_03
+[       OK ] Core.TC_AUTH_03 (43 ms)
+[ RUN      ] Core.TC_PAT_01
+[       OK ] Core.TC_PAT_01 (34 ms)
+[ RUN      ] Core.TC_PAT_02
+[       OK ] Core.TC_PAT_02 (43 ms)
+[ RUN      ] Core.TC_PAT_03
+[       OK ] Core.TC_PAT_03 (21 ms)
+[ RUN      ] Core.TC_DOC_01
+[       OK ] Core.TC_DOC_01 (24 ms)
+[ RUN      ] Core.TC_DOC_02
+[       OK ] Core.TC_DOC_02 (29 ms)
+[ RUN      ] Core.TC_APP_01
+[       OK ] Core.TC_APP_01 (43 ms)
+[ RUN      ] Core.TC_APP_02
+[       OK ] Core.TC_APP_02 (26 ms)
+[ RUN      ] Core.TC_SEC_01
+[       OK ] Core.TC_SEC_01 (19 ms)
+[ RUN      ] Core.RolesEnforcedInServices
+[       OK ] Core.RolesEnforcedInServices (21 ms)
+[ RUN      ] Core.HashesAreSaltedAndNeverPlaintext
+[       OK ] Core.HashesAreSaltedAndNeverPlaintext (19 ms)
+[ RUN      ] Core.BootstrapCannotBypassAdmin
+[       OK ] Core.BootstrapCannotBypassAdmin (22 ms)
+[ RUN      ] Core.PatientValidationAndUniqueIds
+[       OK ] Core.PatientValidationAndUniqueIds (30 ms)
+[ RUN      ] Core.SearchByNameAndLiteralWildcards
+[       OK ] Core.SearchByNameAndLiteralWildcards (31 ms)
+[ RUN      ] Core.AvailabilityAndCalendarValidation
+[       OK ] Core.AvailabilityAndCalendarValidation (27 ms)
+[ RUN      ] Core.ForeignKeysAndDoctorLinks
+[       OK ] Core.ForeignKeysAndDoctorLinks (27 ms)
+[ RUN      ] Core.UpdateContact
+[       OK ] Core.UpdateContact (35 ms)
+[ RUN      ] Core.TC_APP_03
+[       OK ] Core.TC_APP_03 (32 ms)
+[ RUN      ] Core.RescheduleIsAtomic
+[       OK ] Core.RescheduleIsAtomic (36 ms)
+[ RUN      ] Core.DoctorsSeeOnlyOwnSchedule
+[       OK ] Core.DoctorsSeeOnlyOwnSchedule (58 ms)
+[ RUN      ] Core.DailyCountsAndCompletion
+[       OK ] Core.DailyCountsAndCompletion (47 ms)
+[ RUN      ] Core.ReportContents
+[       OK ] Core.ReportContents (78 ms)
+[ RUN      ] Core.ReportErrorsAndPermissions
+[       OK ] Core.ReportErrorsAndPermissions (32 ms)
+[ RUN      ] Core.AvailabilityUpdates
+[       OK ] Core.AvailabilityUpdates (33 ms)
+[ RUN      ] Core.TC_NFR_01
+[       OK ] Core.TC_NFR_01 (3276 ms)
+[ RUN      ] Core.TC_NFR_02
+[       OK ] Core.TC_NFR_02 (26 ms)
+[----------] 28 tests from Core (4921 ms total)
+
+[----------] 1 test from Recovery
+[ RUN      ] Recovery.MissingDatabaseAndPersistence
+[       OK ] Recovery.MissingDatabaseAndPersistence (138 ms)
+[----------] 1 test from Recovery (139 ms total)
+
+[----------] Global test environment tear-down
+[==========] 29 tests from 2 test suites ran. (5085 ms total)
+[  PASSED  ] 29 tests.
+
+==436== Memcheck, a memory error detector
+==436== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
+==436== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==436== Command: /mnt/c/Users/Shashank/.codex/.chatgpt-projects/g-p-6ac9a2734540819188fab92cbe1c7192/work/build/hms_tests
+==436== 
+==436== 
+==436== HEAP SUMMARY:
+==436==     in use at exit: 0 bytes in 0 blocks
+==436==   total heap usage: 111,014 allocs, 111,014 frees, 124,979,948 bytes allocated
+==436== 
+==436== All heap blocks were freed -- no leaks are possible
+==436== 
+==436== For lists of detected and suppressed errors, rerun with: -s
+==436== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)

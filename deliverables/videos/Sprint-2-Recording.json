@@ -1,0 +1,53 @@
+{
+  "sprint": 2,
+  "duration_seconds": 120,
+  "checkpoint": "sprint-2-local",
+  "binary_sha256": "96b8254b53563356297ca516f69d1d82b479e9fe959f262312e87e145ff33dab",
+  "capture": "Real executable PTY output replayed with captions; scene hold durations edited for readability",
+  "scenes": [
+    {
+      "caption": "Sprint 2 extends the working core console application",
+      "seconds": 7
+    },
+    {
+      "caption": "Update patient contact details as a receptionist",
+      "seconds": 8
+    },
+    {
+      "caption": "Create two appointments to exercise scheduling rules",
+      "seconds": 10
+    },
+    {
+      "caption": "A conflicting reschedule fails and preserves the original booking",
+      "seconds": 10
+    },
+    {
+      "caption": "Move the booking to an available slot atomically",
+      "seconds": 10
+    },
+    {
+      "caption": "Cancel the second appointment without deleting its history",
+      "seconds": 9
+    },
+    {
+      "caption": "The doctor sees only their own daily appointments",
+      "seconds": 12
+    },
+    {
+      "caption": "The doctor completes their consultation",
+      "seconds": 9
+    },
+    {
+      "caption": "The administrator receives accurate daily appointment totals",
+      "seconds": 15
+    },
+    {
+      "caption": "Export the patient report to a real CSV file on local disk",
+      "seconds": 15
+    },
+    {
+      "caption": "Working final product with persistent storage and explicit logout",
+      "seconds": 15
+    }
+  ]
+}

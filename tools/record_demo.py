@@ -114,7 +114,7 @@ def record(binary, sprint, checkpoint):
         lines.append(f"file '{frame}'")
         concat = frame_dir / "frames.txt"; concat.write_text("\n".join(lines))
         mp4 = output / f"Sprint-{sprint}-Demo.mp4"
-        subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-f", "concat", "-safe", "0", "-i", str(concat), "-t", str(duration), "-r", "10", "-c:v", "libx264", "-preset", "fast", "-crf", "20", "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(mp4)], check=True)
+        subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-f", "concat", "-safe", "0", "-i", str(concat), "-vf", "fps=10,tpad=stop_mode=clone:stop_duration=1", "-t", str(duration), "-c:v", "libx264", "-preset", "fast", "-crf", "20", "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(mp4)], check=True)
         (output / f"Sprint-{sprint}-Transcript.txt").write_text(transcript)
         manifest = {"sprint": sprint, "duration_seconds": duration, "checkpoint": checkpoint, "binary_sha256":hashlib.sha256(binary.read_bytes()).hexdigest(), "capture":"Real executable PTY output replayed with captions; scene hold durations edited for readability", "scenes":[{"caption":s["caption"],"seconds":s["seconds"]} for s in scenes]}
         (output / f"Sprint-{sprint}-Recording.json").write_text(json.dumps(manifest, indent=2)+"\n")

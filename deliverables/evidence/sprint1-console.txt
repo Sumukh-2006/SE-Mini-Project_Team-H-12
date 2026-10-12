@@ -1,0 +1,1 @@
+PASS: actual console menus, invalid numeric input, registration, search, booking, logout, three-attempt denial
