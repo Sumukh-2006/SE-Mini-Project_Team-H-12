@@ -30,6 +30,21 @@ std::string Statement::text(int col) const {
   return t ? reinterpret_cast<const char *>(t) : "";
 }
 int Statement::integer(int col) const { return sqlite3_column_int(stmt_, col); }
+
+/**
+ * Opens a SQLite database and makes it ready for use on the first startup.
+ *
+ * For file-backed databases, the parent directory is created recursively
+ * before SQLite opens the file. SQLite then creates the database file itself
+ * when it does not exist. The in-memory path is excluded because it has no
+ * filesystem parent and must remain a SQLite-special path. After opening,
+ * connection pragmas and idempotent schema statements are applied so both
+ * newly created and existing databases have the same reliability guarantees.
+ *
+ * Any filesystem, SQLite, or schema initialization error is propagated after
+ * cleaning up the partially opened connection; callers can therefore report a
+ * clear startup error instead of continuing with an invalid database handle.
+ */
 Database::Database(const std::string &path) {
   if (path != ":memory:") {
     const auto parent = std::filesystem::path(path).parent_path();
