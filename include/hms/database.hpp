@@ -18,8 +18,8 @@ public:
   std::string text(int column) const;
   int integer(int column) const;
 };
-/** Owns a SQLite connection with foreign keys, full synchronization and schema
- * initialization. */
+/** Owns a SQLite connection with recursive parent-directory creation,
+ * foreign keys, full synchronization and schema initialization. */
 class Database {
   sqlite3 *db_ = nullptr;
 
