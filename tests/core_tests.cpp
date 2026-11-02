@@ -82,6 +82,13 @@ TEST_F(Core, TC_DOC_01) {
   app.login("admin", "TestPass123");
   auto d = app.addDoctor("Dr Lee", "Neurologist", "9000000003");
   EXPECT_EQ(d.id, 2);
+  EXPECT_EQ(d.name, "Dr Lee");
+  EXPECT_EQ(d.specialization, "Neurologist");
+  EXPECT_EQ(d.contact, "9000000003");
+  // Validate doctor field constraints and error handling
+  EXPECT_THROW(app.addDoctor("", "Neurologist", "9000000003"), std::invalid_argument);
+  EXPECT_THROW(app.addDoctor("Dr Invalid", "", "9000000003"), std::invalid_argument);
+  EXPECT_THROW(app.addDoctor("Dr Invalid", "Neurologist", "123"), std::invalid_argument);
 }
 TEST_F(Core, TC_DOC_02) {
   reception();
