@@ -5,6 +5,9 @@
 #include <stdexcept>
 
 namespace hms {
+/**
+ * @brief Receptionist workflow to register a patient and generate a unique formatted ID (FR-PAT-01, FR-PAT-02).
+ */
 Patient HMS::registerPatient(const std::string &name, int age,
                              const std::string &gender,
                              const std::string &contact,
