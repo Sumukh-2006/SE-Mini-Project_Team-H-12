@@ -45,9 +45,26 @@ protected:
   }
 };
 TEST_F(Core, TC_AUTH_01) {
+  // [FR-AUTH-01, FR-AUTH-02] Verify user login, session establishment, and role assignment
   EXPECT_TRUE(app.login("admin", "TestPass123"));
   ASSERT_TRUE(app.session());
   EXPECT_EQ(app.session()->role, "Admin");
+  EXPECT_EQ(app.session()->username, "admin");
+  app.logout();
+
+  // Verify Receptionist authentication and session
+  EXPECT_TRUE(app.login("reception", "TestPass123"));
+  ASSERT_TRUE(app.session());
+  EXPECT_EQ(app.session()->role, "Receptionist");
+  EXPECT_EQ(app.session()->doctorId, 0);
+  app.logout();
+
+  // Verify Doctor authentication and session with linked doctor profile
+  EXPECT_TRUE(app.login("doctor", "TestPass123"));
+  ASSERT_TRUE(app.session());
+  EXPECT_EQ(app.session()->role, "Doctor");
+  EXPECT_EQ(app.session()->doctorId, 1);
+  app.logout();
 }
 TEST_F(Core, TC_AUTH_02) {
   for (int i = 0; i < 3; ++i)
@@ -113,6 +130,7 @@ TEST_F(Core, TC_SEC_01) {
   EXPECT_FALSE(app.session());
 }
 TEST_F(Core, RolesEnforcedInServices) {
+  // [FR-AUTH-02] Restrict operations according to user roles
   app.login("doctor", "TestPass123");
   EXPECT_THROW(patient(), std::runtime_error);
   EXPECT_THROW(app.addDoctor("No", "No", "9000000001"), std::runtime_error);
@@ -122,6 +140,8 @@ TEST_F(Core, RolesEnforcedInServices) {
                std::runtime_error);
 }
 TEST_F(Core, HashesAreSaltedAndNeverPlaintext) {
+  // [SEC-REQ-01] Passwords must never be stored in plain text.
+  // Validate 128-bit CSPRNG salt (32 hex characters) and SHA-256 digest (64 hex characters).
   auto q = db.prepare("SELECT password_hash,salt FROM users ORDER BY id");
   ASSERT_TRUE(q.step());
   const auto first = q.text(0);
