@@ -56,6 +56,20 @@ public:
                           const std::string &gender, const std::string &contact,
                           const std::string &blood);
   std::vector<Patient> searchPatients(const std::string &query);
+  /**
+   * @brief Registers a new doctor profile into the system (FR-DOC-01, FR-DOC-02).
+   *
+   * Enforces Admin-only authorization, validates parameter bounds (name <= 100 chars,
+   * specialization <= 50 chars, valid contact format), inserts into the database
+   * using parameterized prepared statements, and returns the assigned autoincrement ID.
+   *
+   * @param name Doctor's full name.
+   * @param specialization Medical specialization (e.g., Cardiologist).
+   * @param contact Phone contact (7-15 digits with optional +, -, spaces).
+   * @return Doctor Populated Doctor struct with generated unique ID.
+   * @throws std::runtime_error If caller is not authenticated as Admin.
+   * @throws std::invalid_argument If name, specialization, or contact validation fails.
+   */
   Doctor addDoctor(const std::string &name, const std::string &specialization,
                    const std::string &contact);
   void setAvailability(int doctorId, int weekday, const std::string &start,

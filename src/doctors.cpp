@@ -33,6 +33,9 @@ int weekday(const std::string &date) {
     --y;
   return (y + y / 4 - y / 100 + y / 400 + offsets[m - 1] + d) % 7;
 }
+/**
+ * @brief Admin workflow to register a doctor and assign autoincrement ID (FR-DOC-01, FR-DOC-02).
+ */
 Doctor HMS::addDoctor(const std::string &name, const std::string &spec,
                       const std::string &contact) {
   require({"Admin"});
