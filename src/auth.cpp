@@ -36,12 +36,33 @@ static std::string hex(const unsigned char *bytes, std::size_t size) {
         << static_cast<int>(bytes[i]);
   return out.str();
 }
+/**
+ * @brief Generates a cryptographically secure 128-bit random salt (SEC-REQ-01).
+ *
+ * Employs OpenSSL RAND_bytes CSPRNG to generate 16 bytes of entropy, preventing
+ * rainbow-table and precomputation attacks against stored credential hashes.
+ *
+ * @return std::string Hex-encoded 32-character lowercase salt string.
+ * @throws std::runtime_error If OpenSSL secure randomness is unavailable.
+ */
 std::string randomSalt() {
   unsigned char salt[16];
   if (RAND_bytes(salt, sizeof(salt)) != 1)
     throw std::runtime_error("Secure randomness unavailable");
   return hex(salt, sizeof(salt));
 }
+
+/**
+ * @brief Computes SHA-256 password digest with cryptographic salt (SEC-REQ-01).
+ *
+ * Salts the password as "<salt>:<password>" and hashes via OpenSSL EVP_Digest
+ * using EVP_sha256(). Passwords are never stored or transmitted in plain text.
+ *
+ * @param salt Hex-encoded 128-bit random salt string.
+ * @param password Candidate plaintext password.
+ * @return std::string Hex-encoded 64-character lowercase SHA-256 digest string.
+ * @throws std::runtime_error If EVP digest calculation fails.
+ */
 std::string passwordHash(const std::string &salt, const std::string &password) {
   const std::string input = salt + ":" + password;
   unsigned char digest[EVP_MAX_MD_SIZE];
@@ -51,6 +72,16 @@ std::string passwordHash(const std::string &salt, const std::string &password) {
     throw std::runtime_error("Password hashing failed");
   return hex(digest, length);
 }
+
+/**
+ * @brief Enforces role-based access control (RBAC) on service operations (FR-AUTH-02).
+ *
+ * Validates that an active session exists and the current authenticated user's role
+ * is authorized to execute the calling operation.
+ *
+ * @param roles Permitted roles ('Admin', 'Receptionist', 'Doctor').
+ * @throws std::runtime_error If no session is active or role is unauthorized.
+ */
 void HMS::require(const std::vector<std::string> &roles) const {
   if (!session_ ||
       std::find(roles.begin(), roles.end(), session_->role) == roles.end())
@@ -63,6 +94,9 @@ static void validateCredentials(const std::string &name,
   if (password.size() < 8)
     throw std::invalid_argument("Password must contain at least 8 characters");
 }
+/**
+ * @brief Bootstraps the system with an initial Administrator account (SEC-REQ-01, FR-AUTH-02).
+ */
 void HMS::bootstrap(const std::string &name, const std::string &password) {
   validateCredentials(name, password);
   Transaction tx(db_);
@@ -80,6 +114,10 @@ void HMS::bootstrap(const std::string &name, const std::string &password) {
   insert.step();
   tx.commit();
 }
+
+/**
+ * @brief Admin workflow to provision new accounts with role assignment (FR-AUTH-02, SEC-REQ-01).
+ */
 void HMS::provision(const std::string &name, const std::string &password,
                     const std::string &role, int doctorId) {
   require({"Admin"});
@@ -100,6 +138,13 @@ void HMS::provision(const std::string &name, const std::string &password,
   q.bind(5, doctorId);
   q.step();
 }
+
+/**
+ * @brief Authenticates user credentials with constant-time hash comparison (FR-AUTH-01, SEC-REQ-01).
+ *
+ * Utilizes OpenSSL CRYPTO_memcmp to thwart side-channel timing attacks during hash verification.
+ * Enforces session management and 3-attempt brute-force lockout protection.
+ */
 bool HMS::login(const std::string &name, const std::string &password) {
   if (session_)
     throw std::runtime_error("Logout before logging in again");
@@ -121,5 +166,9 @@ bool HMS::login(const std::string &name, const std::string &password) {
   ++attempts_;
   return false;
 }
+
+/**
+ * @brief Terminates active session and resets authentication context (FR-AUTH-01).
+ */
 void HMS::logout() { session_.reset(); }
 } // namespace hms
