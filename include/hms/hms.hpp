@@ -148,6 +148,20 @@ public:
   Patient registerPatient(const std::string &name, int age,
                           const std::string &gender, const std::string &contact,
                           const std::string &blood);
+  /**
+   * @brief Searches for patients by exact Patient ID or name substring (FR-PAT-03).
+   *
+   * Enforces role-based access control allowing only Receptionist and Doctor roles.
+   * Performs an exact lookup by public Patient ID (e.g., 'P000001') or a case-insensitive
+   * substring search on the patient's name. SQL LIKE wildcard characters ('%', '_', '!')
+   * in user input are escaped using '!' with ESCAPE '!' to prevent wildcard injection
+   * and unauthorized database scraping.
+   *
+   * @param query Search query matching exact Patient ID or name substring (up to 100 characters).
+   * @return std::vector<Patient> Matching patient records ordered by id.
+   * @throws std::runtime_error If caller is unauthenticated or not authorized (neither Receptionist nor Doctor).
+   * @throws std::invalid_argument If query is invalid (empty, all-whitespace, non-printable, or > 100 characters).
+   */
   std::vector<Patient> searchPatients(const std::string &query);
   /**
    * @brief Registers a new doctor profile into the system (FR-DOC-01, FR-DOC-02).

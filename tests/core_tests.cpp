@@ -108,13 +108,32 @@ TEST_F(Core, TC_PAT_01) {
   EXPECT_EQ(p.bloodGroup, "O+");
 }
 TEST_F(Core, TC_PAT_02) {
+  // [FR-PAT-03] Search patient by exact Patient ID with Receptionist and Doctor role enforcement
   reception();
   auto p = patient();
   auto result = app.searchPatients(p.id);
   ASSERT_EQ(result.size(), 1u);
+  EXPECT_EQ(result[0].id, p.id);
+  EXPECT_EQ(result[0].name, "Alex Demo");
   EXPECT_EQ(result[0].contact, "9000000002");
+
+  // Verify Doctor role is also authorized to search patients
+  app.logout();
+  app.login("doctor", "TestPass123");
+  auto docResult = app.searchPatients(p.id);
+  ASSERT_EQ(docResult.size(), 1u);
+  EXPECT_EQ(docResult[0].id, p.id);
+  EXPECT_EQ(docResult[0].name, "Alex Demo");
+
+  // Verify unauthorized roles (Admin, unauthenticated) cannot search patients
+  app.logout();
+  app.login("admin", "TestPass123");
+  EXPECT_THROW(app.searchPatients(p.id), std::runtime_error);
+  app.logout();
+  EXPECT_THROW(app.searchPatients(p.id), std::runtime_error);
 }
 TEST_F(Core, TC_PAT_03) {
+  // [FR-PAT-03] Search for non-existent patient ID returns empty result
   reception();
   EXPECT_TRUE(app.searchPatients("P999999").empty());
 }
@@ -200,12 +219,24 @@ TEST_F(Core, PatientValidationAndUniqueIds) {
                std::invalid_argument);
 }
 TEST_F(Core, SearchByNameAndLiteralWildcards) {
+  // [FR-PAT-03] Search by name substring, case-insensitivity, and SQL LIKE wildcard escaping
   reception();
   patient();
   EXPECT_EQ(app.searchPatients("Alex").size(), 1u);
-  EXPECT_TRUE(app.searchPatients("%").empty());
+  EXPECT_EQ(app.searchPatients("alex").size(), 1u); // Case-insensitive matching
+  EXPECT_EQ(app.searchPatients("Demo").size(), 1u);
+  EXPECT_EQ(app.searchPatients("lex").size(), 1u);  // Substring matching
+  EXPECT_TRUE(app.searchPatients("%").empty());     // Escaped wildcard: '%'
+  EXPECT_TRUE(app.searchPatients("_").empty());     // Escaped wildcard: '_'
+  EXPECT_TRUE(app.searchPatients("!").empty());     // Escaped escape character: '!'
   auto p = app.registerPatient("O'Neil", 20, "Male", "9000000004", "A+");
   EXPECT_EQ(app.searchPatients("O'Neil")[0].id, p.id);
+  EXPECT_EQ(app.searchPatients("o'neil")[0].id, p.id);
+
+  // Search input validation
+  EXPECT_THROW(app.searchPatients(""), std::invalid_argument);
+  EXPECT_THROW(app.searchPatients("   "), std::invalid_argument);
+  EXPECT_THROW(app.searchPatients(std::string(101, 'a')), std::invalid_argument);
 }
 TEST_F(Core, AvailabilityAndCalendarValidation) {
   reception();
