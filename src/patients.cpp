@@ -44,6 +44,14 @@ Patient HMS::registerPatient(const std::string &name, int age,
   tx.commit();
   return {formatted.str(), name, age, gender, contact, blood};
 }
+/**
+ * @brief Search patients by exact Patient ID or name substring with wildcard escaping (FR-PAT-03).
+ *
+ * Enforces Receptionist and Doctor role authorization. Escapes SQL LIKE wildcards
+ * ('%', '_', '!') in the search query using an escape character ('!') so users cannot
+ * inject wildcards to scrape or enumerate records. Executes a parameterized query
+ * matching exact public_id or case-insensitive substring of name with ESCAPE '!'.
+ */
 std::vector<Patient> HMS::searchPatients(const std::string &term) {
   require({"Receptionist", "Doctor"});
   validateText(term, 100, "search term");
