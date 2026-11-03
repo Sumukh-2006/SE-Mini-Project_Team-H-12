@@ -63,6 +63,20 @@ Database::Database(const std::string &path) {
     execute("PRAGMA foreign_keys=ON");
     execute("PRAGMA journal_mode=WAL");
     execute("PRAGMA synchronous=FULL");
+    // PRAGMA assignments may succeed without selecting the requested mode.
+    // Fail startup rather than silently weakening file-backed durability.
+    {
+      auto journal = prepare("PRAGMA journal_mode");
+      if (!journal.step() ||
+          journal.text(0) != (path == ":memory:" ? "memory" : "wal"))
+        throw std::runtime_error("Required SQLite journal mode unavailable");
+      auto sync = prepare("PRAGMA synchronous");
+      if (!sync.step() || sync.integer(0) != 2)
+        throw std::runtime_error("SQLite synchronous=FULL unavailable");
+      auto foreignKeys = prepare("PRAGMA foreign_keys");
+      if (!foreignKeys.step() || foreignKeys.integer(0) != 1)
+        throw std::runtime_error("SQLite foreign key enforcement unavailable");
+    }
     execute(R"SQL(
 CREATE TABLE IF NOT EXISTS doctors(id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT NOT NULL,specialization TEXT NOT NULL,contact TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT,username TEXT NOT NULL UNIQUE,password_hash TEXT NOT NULL,salt TEXT NOT NULL,role TEXT NOT NULL CHECK(role IN ('Admin','Receptionist','Doctor')),doctor_id INTEGER UNIQUE REFERENCES doctors(id),CHECK((role='Doctor' AND doctor_id IS NOT NULL) OR (role!='Doctor' AND doctor_id IS NULL)));
@@ -95,10 +109,17 @@ void Database::execute(const std::string &sql) {
 int Database::lastId() const {
   return static_cast<int>(sqlite3_last_insert_rowid(db_));
 }
+/** @brief Acquire the writer reservation before business writes begin.
+ * WAL keeps readers isolated from pending writes. FULL synchronization flushes
+ * the WAL at commit; after a crash SQLite recovers committed frames only.
+ */
 Transaction::Transaction(Database &db) : db_(db) {
   db_.execute("BEGIN IMMEDIATE");
 }
-Transaction::~Transaction() {
+/** @brief Roll back on ordinary scope exit without masking an active exception.
+ * Abrupt termination bypasses this destructor and relies on SQLite recovery.
+ */
+Transaction::~Transaction() noexcept {
   if (!committed_) {
     try {
       db_.execute("ROLLBACK");
@@ -106,6 +127,7 @@ Transaction::~Transaction() {
     }
   }
 }
+/** @brief Publish all writes atomically; a failed COMMIT leaves rollback armed. */
 void Transaction::commit() {
   db_.execute("COMMIT");
   committed_ = true;

@@ -471,3 +471,68 @@ TEST(Recovery, MissingDatabaseAndPersistence) {
     EXPECT_EQ(result[0].name, "Persistent Patient");
   }
 }
+
+// [NFR-REL-01] Verify the actual production connection, including reopen.
+TEST(Reliability, DurableSettingsAndCommittedPersistence) {
+  TempDirectory temp;
+  const auto path = (temp.path / "reliability.db").string();
+  for (int pass = 0; pass < 2; ++pass) {
+    hms::Database db(path);
+    {
+      auto journal = db.prepare("PRAGMA journal_mode");
+      ASSERT_TRUE(journal.step());
+      EXPECT_EQ(journal.text(0), "wal");
+      auto sync = db.prepare("PRAGMA synchronous");
+      ASSERT_TRUE(sync.step());
+      EXPECT_EQ(sync.integer(0), 2);
+      auto fk = db.prepare("PRAGMA foreign_keys");
+      ASSERT_TRUE(fk.step());
+      EXPECT_EQ(fk.integer(0), 1);
+    }
+    if (pass == 0) {
+      hms::Transaction tx(db);
+      db.execute("INSERT INTO doctors(name,specialization,contact) VALUES('Persistent','General','9000000001')");
+      tx.commit();
+    }
+    auto rows = db.prepare("SELECT count(*) FROM doctors");
+    ASSERT_TRUE(rows.step());
+    EXPECT_EQ(rows.integer(0), 1);
+    auto integrity = db.prepare("PRAGMA integrity_check");
+    ASSERT_TRUE(integrity.step());
+    EXPECT_EQ(integrity.text(0), "ok");
+  }
+}
+
+TEST(Reliability, ScopeExitAndExceptionRollBackAllWrites) {
+  hms::Database db(":memory:");
+  for (bool unwind : {false, true}) {
+    try {
+      hms::Transaction tx(db);
+      db.execute("INSERT INTO doctors(name,specialization,contact) VALUES('Pending','General','9000000001')");
+      if (unwind)
+        db.execute("INSERT INTO availability VALUES(999,1,540,600)");
+    } catch (const std::runtime_error &) {
+      EXPECT_TRUE(unwind);
+    }
+    auto rows = db.prepare("SELECT count(*) FROM doctors");
+    ASSERT_TRUE(rows.step());
+    EXPECT_EQ(rows.integer(0), 0);
+  }
+  hms::Transaction next(db);
+  EXPECT_NO_THROW(next.commit());
+}
+
+TEST(Reliability, FailedCommitKeepsRollbackArmed) {
+  hms::Database db(":memory:");
+  db.execute("CREATE TABLE deferred_link(doctor_id INTEGER REFERENCES doctors(id) DEFERRABLE INITIALLY DEFERRED)");
+  {
+    hms::Transaction tx(db);
+    db.execute("INSERT INTO deferred_link VALUES(999)");
+    EXPECT_THROW(tx.commit(), std::runtime_error);
+  }
+  auto rows = db.prepare("SELECT count(*) FROM deferred_link");
+  ASSERT_TRUE(rows.step());
+  EXPECT_EQ(rows.integer(0), 0);
+  hms::Transaction next(db);
+  EXPECT_NO_THROW(next.commit());
+}
