@@ -83,6 +83,10 @@ TEST_F(Core, TC_PAT_01) {
   auto p = patient();
   EXPECT_EQ(p.id, "P000001");
   EXPECT_EQ(p.name, "Alex Demo");
+  EXPECT_EQ(p.age, 29);
+  EXPECT_EQ(p.gender, "Other");
+  EXPECT_EQ(p.contact, "9000000002");
+  EXPECT_EQ(p.bloodGroup, "O+");
 }
 TEST_F(Core, TC_PAT_02) {
   reception();

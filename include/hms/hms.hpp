@@ -112,6 +112,25 @@ public:
    * @return const std::optional<Session>& Current active session.
    */
   const std::optional<Session> &session() const { return session_; }
+  /**
+   * @brief Registers a new patient into the system (FR-PAT-01, FR-PAT-02).
+   *
+   * Enforces Receptionist-only authorization, validates input parameters
+   * (name <= 100 chars, age between 0 and 130, gender in Male/Female/Other,
+   * contact format 7-15 digits with optional symbols, valid blood group), inserts
+   * into the database, generates a formatted unique alphanumeric public ID
+   * (P followed by 6 zero-padded digits, e.g., P000001) within an atomic SQLite
+   * transaction, and returns the populated Patient entity.
+   *
+   * @param name Patient full name (max 100 characters).
+   * @param age Patient age (0 to 130 inclusive).
+   * @param gender Patient gender ('Male', 'Female', or 'Other').
+   * @param contact Patient contact number (7 to 15 digits).
+   * @param blood Patient blood group ('A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-').
+   * @return Patient Populated Patient struct with formatted public ID.
+   * @throws std::runtime_error If caller is not authenticated as Receptionist.
+   * @throws std::invalid_argument If any parameter fails validation.
+   */
   Patient registerPatient(const std::string &name, int age,
                           const std::string &gender, const std::string &contact,
                           const std::string &blood);
