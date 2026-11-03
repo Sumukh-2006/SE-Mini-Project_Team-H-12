@@ -67,16 +67,35 @@ TEST_F(Core, TC_AUTH_01) {
   app.logout();
 }
 TEST_F(Core, TC_AUTH_02) {
-  for (int i = 0; i < 3; ++i)
-    EXPECT_FALSE(app.login("admin", "wrong"));
+  // [FR-AUTH-03] Block login after three incorrect attempts within session
+  EXPECT_FALSE(app.locked());
+  EXPECT_FALSE(app.login("admin", "wrong-1"));
+  EXPECT_FALSE(app.locked());
+  EXPECT_FALSE(app.login("admin", "wrong-2"));
+  EXPECT_FALSE(app.locked());
+  EXPECT_FALSE(app.login("admin", "wrong-3"));
   EXPECT_TRUE(app.locked());
+
+  // Subsequent login attempts are immediately denied once locked, even with valid credentials
   EXPECT_FALSE(app.login("admin", "TestPass123"));
 }
 TEST_F(Core, TC_AUTH_03) {
+  // [FR-AUTH-04] Enforce session termination upon explicit user logout
   reception();
+  EXPECT_TRUE(app.session().has_value());
   app.logout();
-  EXPECT_FALSE(app.session());
+  EXPECT_FALSE(app.session().has_value());
+
+  // All role-protected operations throw runtime_error until a new valid login occurs
   EXPECT_THROW(patient(), std::runtime_error);
+  EXPECT_THROW(app.addDoctor("Dr New", "Pediatrics", "9000000099"),
+               std::runtime_error);
+
+  // Authenticating again restores authorized access
+  reception();
+  EXPECT_TRUE(app.session().has_value());
+  EXPECT_NO_THROW(patient());
+  app.logout();
 }
 TEST_F(Core, TC_PAT_01) {
   reception();

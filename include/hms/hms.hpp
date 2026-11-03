@@ -81,12 +81,16 @@ public:
                  const std::string &role, int doctorId = 0);
 
   /**
-   * @brief Authenticates a user using constant-time hash verification (FR-AUTH-01, SEC-REQ-01).
+   * @brief Authenticates a user with constant-time hash verification and brute-force lockout (FR-AUTH-01, FR-AUTH-03, SEC-REQ-01).
    *
    * Queries stored credentials for the username, computes the salted SHA-256 hash using
    * the stored 128-bit salt, and performs constant-time comparison (CRYPTO_memcmp)
-   * to protect against timing-attack leakage. Initializes private session state on success
-   * and enforces lockout after 3 consecutive failed attempts.
+   * to protect against timing-attack leakage.
+   *
+   * On successful authentication, initializes private session state and resets the failed
+   * attempt counter (attempts_ = 0).
+   * On failed authentication, increments attempts_ (++attempts_). If 3 consecutive failures
+   * occur, locked() becomes true and subsequent login attempts are denied immediately.
    *
    * @param username Username attempting to log in.
    * @param password Candidate plaintext password.
@@ -97,13 +101,23 @@ public:
   bool login(const std::string &username, const std::string &password);
 
   /**
-   * @brief Terminates the active user session and clears session state (FR-AUTH-01).
+   * @brief Terminates the active user session and revokes authenticated privileges (FR-AUTH-04).
+   *
+   * Clears in-memory session credentials via session_.reset(), ensuring that any subsequent
+   * role-protected business operation throws std::runtime_error ("Permission denied") until
+   * a valid user authenticates again.
    */
   void logout();
 
   /**
-   * @brief Indicates whether authentication is locked after excessive failed attempts (FR-AUTH-01).
-   * @return true If 3 or more consecutive failed login attempts have occurred.
+   * @brief Enforces account lockout after three failed login attempts (FR-AUTH-03).
+   *
+   * Tracks consecutive unsuccessful authentication attempts within the active process
+   * attempt session. When attempts_ reaches or exceeds the threshold of 3 (attempts_ >= 3),
+   * access is denied, subsequent authentication calls are immediately blocked, and the
+   * console application terminates with access denied exit status 2.
+   *
+   * @return true If 3 or more consecutive failed login attempts have occurred; false otherwise.
    */
   bool locked() const { return attempts_ >= 3; }
 
