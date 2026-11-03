@@ -132,8 +132,34 @@ public:
    */
   Doctor addDoctor(const std::string &name, const std::string &specialization,
                    const std::string &contact);
+  /**
+   * @brief Configures weekly working hours for a registered doctor (FR-DOC-03).
+   *
+   * Enforces Admin-only authorization. Validates that the weekday is in range 0-6 (0=Sunday),
+   * start and end times are aligned to 15-minute boundaries (quarter hours), and start < end.
+   * Atomically checks that existing 'Scheduled' appointments on that weekday are not excluded
+   * by the new working window, rejecting the update if a conflict would occur.
+   *
+   * @param doctorId Registered doctor ID.
+   * @param weekday Day of the week (0 Sunday, 1 Monday ... 6 Saturday).
+   * @param start Shift start time in HH:MM format (e.g. "09:00").
+   * @param end Shift end time in HH:MM format (e.g. "17:00").
+   * @throws std::runtime_error If caller is not Admin, doctor does not exist, or an existing appointment would be excluded.
+   * @throws std::invalid_argument If weekday or time boundary format validation fails.
+   */
   void setAvailability(int doctorId, int weekday, const std::string &start,
                        const std::string &end);
+
+  /**
+   * @brief Retrieves registered doctors, optionally filtered by specialization (FR-DOC-04).
+   *
+   * Accessible to Administrators and Receptionists. If specialization is empty, returns all
+   * registered doctors. Otherwise, performs a case-insensitive match against the specialization.
+   *
+   * @param specialization Medical specialization filter (empty string for all doctors).
+   * @return std::vector<Doctor> List of matching doctor records ordered by ID.
+   * @throws std::runtime_error If caller is not authenticated as Admin or Receptionist.
+   */
   std::vector<Doctor> doctors(const std::string &specialization);
   Appointment book(const std::string &patientId, int doctorId,
                    const std::string &date, const std::string &time);

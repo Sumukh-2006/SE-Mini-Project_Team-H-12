@@ -112,6 +112,12 @@ TEST_F(Core, TC_DOC_02) {
   auto doctors = app.doctors("Cardiologist");
   ASSERT_EQ(doctors.size(), 1u);
   EXPECT_EQ(doctors[0].specialization, "Cardiologist");
+  // Case-insensitive filtering check
+  auto lower = app.doctors("cardiologist");
+  ASSERT_EQ(lower.size(), 1u);
+  EXPECT_EQ(lower[0].id, doctors[0].id);
+  // Empty string returns all doctors
+  EXPECT_FALSE(app.doctors("").empty());
   EXPECT_TRUE(app.doctors("Dentist").empty());
 }
 TEST_F(Core, TC_APP_01) {

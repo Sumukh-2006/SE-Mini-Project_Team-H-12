@@ -50,6 +50,9 @@ Doctor HMS::addDoctor(const std::string &name, const std::string &spec,
   q.step();
   return {db_.lastId(), name, spec, contact};
 }
+/**
+ * @brief Configures weekly working hours for a doctor with conflict check (FR-DOC-03).
+ */
 void HMS::setAvailability(int id, int day, const std::string &start,
                           const std::string &end) {
   require({"Admin"});
@@ -79,6 +82,10 @@ void HMS::setAvailability(int id, int day, const std::string &start,
   q.step();
   tx.commit();
 }
+
+/**
+ * @brief Retrieves doctors filtered by specialization or all doctors if filter is empty (FR-DOC-04).
+ */
 std::vector<Doctor> HMS::doctors(const std::string &spec) {
   require({"Admin", "Receptionist"});
   auto q =
