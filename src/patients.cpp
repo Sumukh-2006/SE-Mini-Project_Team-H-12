@@ -72,6 +72,13 @@ std::vector<Patient> HMS::searchPatients(const std::string &term) {
         {q.text(0), q.text(1), q.integer(2), q.text(3), q.text(4), q.text(5)});
   return result;
 }
+/**
+ * @brief Updates patient contact information in SQLite (FR-PAT-04).
+ *
+ * Restricts access to Receptionists via require(). Validates contact format,
+ * ensures patient existence, and updates contact column in SQLite preserving
+ * all other demographic attributes.
+ */
 void HMS::updateContact(const std::string &id, const std::string &contact) {
   require({"Receptionist"});
   validateContact(contact);

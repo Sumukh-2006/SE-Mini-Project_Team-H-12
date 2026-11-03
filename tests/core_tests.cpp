@@ -262,14 +262,32 @@ TEST_F(Core, ForeignKeysAndDoctorLinks) {
 }
 
 TEST_F(Core, UpdateContact) {
+  // [FR-PAT-04] Receptionist updates patient contact details in SQLite while preserving other details
   reception();
   auto p = patient();
   app.updateContact(p.id, "9000000008");
-  EXPECT_EQ(app.searchPatients(p.id)[0].contact, "9000000008");
+  auto updated = app.searchPatients(p.id);
+  ASSERT_EQ(updated.size(), 1u);
+  EXPECT_EQ(updated[0].id, p.id);
+  EXPECT_EQ(updated[0].name, p.name);
+  EXPECT_EQ(updated[0].age, p.age);
+  EXPECT_EQ(updated[0].gender, p.gender);
+  EXPECT_EQ(updated[0].bloodGroup, p.bloodGroup);
+  EXPECT_EQ(updated[0].contact, "9000000008");
+
+  // Error handling: non-existent patient ID and invalid contact formats
   EXPECT_THROW(app.updateContact("P999999", "9000000008"), std::runtime_error);
   EXPECT_THROW(app.updateContact(p.id, "invalid"), std::invalid_argument);
+  EXPECT_THROW(app.updateContact(p.id, "123"), std::invalid_argument);
+
+  // Role authorization: Doctor, Admin, and unauthenticated callers cannot update patient contacts
   app.logout();
   app.login("doctor", "TestPass123");
+  EXPECT_THROW(app.updateContact(p.id, "9000000008"), std::runtime_error);
+  app.logout();
+  app.login("admin", "TestPass123");
+  EXPECT_THROW(app.updateContact(p.id, "9000000008"), std::runtime_error);
+  app.logout();
   EXPECT_THROW(app.updateContact(p.id, "9000000008"), std::runtime_error);
 }
 TEST_F(Core, TC_APP_03) {

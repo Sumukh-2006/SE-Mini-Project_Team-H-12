@@ -210,7 +210,19 @@ public:
   std::vector<Doctor> doctors(const std::string &specialization);
   Appointment book(const std::string &patientId, int doctorId,
                    const std::string &date, const std::string &time);
-  /** Receptionist-only patient contact update. */
+  /**
+   * @brief Updates contact information for a registered patient (FR-PAT-04).
+   *
+   * Enforces Receptionist-only authorization. Validates the new contact number
+   * (must contain 7 to 15 digits with optional +, -, or spaces). Verifies that
+   * the target patient exists via their public ID and updates the contact
+   * atomically in SQLite while preserving all other patient fields.
+   *
+   * @param patientId Formatted public patient ID (e.g., 'P000001').
+   * @param contact New contact phone number (7 to 15 digits).
+   * @throws std::runtime_error If caller is not authenticated as a Receptionist or patient does not exist.
+   * @throws std::invalid_argument If the contact number fails format/length validation.
+   */
   void updateContact(const std::string &patientId, const std::string &contact);
   /** Receptionist-only cancellation and atomic rescheduling of Scheduled
    * records. */
