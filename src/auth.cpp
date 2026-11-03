@@ -140,10 +140,18 @@ void HMS::provision(const std::string &name, const std::string &password,
 }
 
 /**
- * @brief Authenticates user credentials with constant-time hash comparison (FR-AUTH-01, SEC-REQ-01).
+ * @brief Authenticates user credentials with constant-time hash comparison and 3-attempt lockout (FR-AUTH-01, FR-AUTH-03, SEC-REQ-01).
  *
  * Utilizes OpenSSL CRYPTO_memcmp to thwart side-channel timing attacks during hash verification.
- * Enforces session management and 3-attempt brute-force lockout protection.
+ * Enforces session management and 3-attempt brute-force lockout protection (FR-AUTH-03).
+ * Immediately rejects login attempts when locked() is true (attempts_ >= 3).
+ * Increments failed attempts counter (++attempts_) on invalid credentials and resets attempts_
+ * to 0 upon successful authentication.
+ *
+ * @param name Username attempting authentication.
+ * @param password Candidate plaintext password.
+ * @return true on successful authentication; false on credential mismatch or active lockout.
+ * @throws std::runtime_error If a session is already active without prior logout.
  */
 bool HMS::login(const std::string &name, const std::string &password) {
   if (session_)
@@ -168,7 +176,11 @@ bool HMS::login(const std::string &name, const std::string &password) {
 }
 
 /**
- * @brief Terminates active session and resets authentication context (FR-AUTH-01).
+ * @brief Explicitly terminates active session and clears authorization context (FR-AUTH-04).
+ *
+ * Resets the private session_ state (session_.reset()), thereby stripping all granted role
+ * permissions. All subsequent role-guarded operations immediately throw std::runtime_error
+ * until another successful login occurs.
  */
 void HMS::logout() { session_.reset(); }
 } // namespace hms
