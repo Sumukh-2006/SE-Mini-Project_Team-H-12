@@ -163,15 +163,26 @@ TEST_F(Core, TC_DOC_02) {
   EXPECT_TRUE(app.doctors("Dentist").empty());
 }
 TEST_F(Core, TC_APP_01) {
+  // [FR-APP-01] Book appointment with valid patient, doctor, date, and 15-min slot
   reception();
   auto a = app.book(patient().id, 1, "2026-10-19", "09:00");
   EXPECT_EQ(a.status, "Scheduled");
+  EXPECT_GT(a.id, 0);
+  EXPECT_EQ(a.doctorId, 1);
+  EXPECT_EQ(a.date, "2026-10-19");
+  EXPECT_EQ(a.time, "09:00");
 }
 TEST_F(Core, TC_APP_02) {
+  // [FR-APP-02] Reject booking conflicts and invalid requests
   reception();
   auto p = patient();
   app.book(p.id, 1, "2026-10-19", "09:00");
+  // Conflicting duplicate slot must be rejected
   EXPECT_THROW(app.book(p.id, 1, "2026-10-19", "09:00"), std::runtime_error);
+  // Non-existent patient must be rejected
+  EXPECT_THROW(app.book("P999999", 1, "2026-10-19", "09:15"), std::runtime_error);
+  // Non-existent doctor must be rejected
+  EXPECT_THROW(app.book(p.id, 999, "2026-10-19", "09:15"), std::runtime_error);
 }
 TEST_F(Core, TC_SEC_01) {
   EXPECT_FALSE(app.login("' OR 1=1 --", "anything"));

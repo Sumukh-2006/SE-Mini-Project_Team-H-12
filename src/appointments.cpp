@@ -2,6 +2,9 @@
 #include <stdexcept>
 
 namespace hms {
+/**
+ * @brief Checks doctor availability and slot conflicts (FR-APP-02).
+ */
 bool HMS::available(int id, const std::string &date, const std::string &time,
                     int exclude) {
   const int day = weekday(date), at = minutes(time);
@@ -24,6 +27,10 @@ bool HMS::available(int id, const std::string &date, const std::string &time,
   busy.bind(4, exclude);
   return !busy.step();
 }
+
+/**
+ * @brief Books a 15-minute appointment slot inside a database transaction (FR-APP-01, FR-APP-02).
+ */
 Appointment HMS::book(const std::string &patient, int doctor,
                       const std::string &date, const std::string &time) {
   require({"Receptionist"});
