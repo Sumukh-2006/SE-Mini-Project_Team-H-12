@@ -43,6 +43,16 @@ class HMS {
   Database &db_;
   std::optional<Session> session_;
   int attempts_ = 0;
+  /**
+   * @brief Enforces backend role-based authorization before sensitive service execution (SEC-REQ-03, FR-AUTH-02).
+   *
+   * Verifies that an authenticated session is active and the current user's role
+   * is present in the specified allowed roles list. Rejects unauthorized callers at the
+   * backend C++ service layer prior to executing database queries or mutating state.
+   *
+   * @param roles List of authorized role names (e.g., {"Admin"}, {"Receptionist"}, {"Doctor"}).
+   * @throws std::runtime_error With message "Permission denied" if session is absent or role is unauthorized.
+   */
   void require(const std::vector<std::string> &roles) const;
   /**
    * @brief Validates doctor working hours and checks for conflicting bookings (FR-APP-02).

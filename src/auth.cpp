@@ -74,13 +74,14 @@ std::string passwordHash(const std::string &salt, const std::string &password) {
 }
 
 /**
- * @brief Enforces role-based access control (RBAC) on service operations (FR-AUTH-02).
+ * @brief Enforces backend role-based authorization for service operations (SEC-REQ-03, FR-AUTH-02).
  *
- * Validates that an active session exists and the current authenticated user's role
- * is authorized to execute the calling operation.
+ * Checks that an active session exists and the session's role matches one of the permitted
+ * roles. Prevents privilege escalation and unauthorized access at the business service layer
+ * before executing any data access or modifying domain state.
  *
- * @param roles Permitted roles ('Admin', 'Receptionist', 'Doctor').
- * @throws std::runtime_error If no session is active or role is unauthorized.
+ * @param roles List of permitted roles ('Admin', 'Receptionist', 'Doctor').
+ * @throws std::runtime_error With message "Permission denied" if no session exists or user's role is unauthorized.
  */
 void HMS::require(const std::vector<std::string> &roles) const {
   if (!session_ ||
