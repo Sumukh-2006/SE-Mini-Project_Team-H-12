@@ -87,7 +87,7 @@ void menu(hms::HMS &app) {
   if (role == "Admin")
     std::cout << "1 Add doctor\n2 Set weekly availability\n3 List doctors\n4 "
                  "Create user account\n5 Daily appointment report\n6 Export "
-                 "patient report\n7 Export daily report\n";
+                 "patient report\n7 Export daily report\n8 View patient report\n";
   if (role == "Receptionist")
     std::cout << "1 Register patient\n2 Search patients\n3 Filter doctors\n4 "
                  "Book appointment\n5 Update patient contact\n6 Cancel "
@@ -141,6 +141,10 @@ void menu(hms::HMS &app) {
       auto path = input("Output file (.csv or .txt): ");
       app.exportDaily(date, path);
       std::cout << "Daily report exported\n";
+    } else if (choice == 8) {
+      auto patients = app.patientReport();
+      std::cout << "Patient ID | Name | Age | Gender | Contact | Blood Group\n";
+      showPatients(patients);
     } else
       throw std::invalid_argument("Unknown menu option");
   } else if (role == "Receptionist") {
