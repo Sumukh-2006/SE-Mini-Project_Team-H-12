@@ -32,7 +32,7 @@ struct Session {
   std::string username, role;
   int doctorId;
 };
-/** Counts appointments by their current scheduled date and current status. */
+/** Counts appointments by current date. Total booked includes all three statuses. */
 struct DailyReport {
   int totalBooked, scheduled, canceled, completed;
 };
@@ -272,9 +272,13 @@ public:
   std::vector<Appointment> mySchedule(const std::string &date);
   /** Linked doctor may complete only their own Scheduled appointment. */
   void complete(int appointmentId);
-  /** Administrator-only daily totals and local CSV/text report exports. */
+  /** @brief Admin-only counts for a validated YYYY-MM-DD appointment date. */
   DailyReport dailyReport(const std::string &date);
+  /** @brief Admin-only roster of all registered patients in registration order. */
+  std::vector<Patient> patientReport();
+  /** @brief Admin-only roster export to .txt or RFC 4180 CSV. */
   void exportPatients(const std::string &path);
+  /** @brief Admin-only daily totals export to .txt or RFC 4180 CSV. */
   void exportDaily(const std::string &date, const std::string &path);
 };
 /** Shared validation runs in the business layer as well as interactive input

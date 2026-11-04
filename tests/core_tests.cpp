@@ -20,7 +20,7 @@ public:
 };
 
 static std::string readFile(const std::filesystem::path &path) {
-  std::ifstream in(path);
+  std::ifstream in(path, std::ios::binary);
   std::ostringstream out;
   out << in.rdbuf();
   return out.str();
@@ -405,6 +405,14 @@ TEST_F(Core, ReportContents) {
   app.book(p.id, 1, "2026-10-19", "09:00");
   app.logout();
   app.login("admin", "TestPass123");
+  const auto roster = app.patientReport();
+  ASSERT_EQ(roster.size(), 1u);
+  EXPECT_EQ(roster.front().id, p.id);
+  EXPECT_EQ(roster.front().name, p.name);
+  EXPECT_EQ(roster.front().age, p.age);
+  EXPECT_EQ(roster.front().gender, p.gender);
+  EXPECT_EQ(roster.front().contact, p.contact);
+  EXPECT_EQ(roster.front().bloodGroup, p.bloodGroup);
   TempDirectory temp;
   app.exportPatients((temp.path / "patients.csv").string());
   app.exportPatients((temp.path / "patients.txt").string());
@@ -414,7 +422,7 @@ TEST_F(Core, ReportContents) {
       readFile(temp.path / "patients.csv").find("\"Demo, \"\"Quoted\"\"\""),
       std::string::npos);
   EXPECT_NE(readFile(temp.path / "patients.txt").find(p.id), std::string::npos);
-  EXPECT_NE(readFile(temp.path / "daily.csv").find("2026-10-19,1,1,0,0"),
+  EXPECT_NE(readFile(temp.path / "daily.csv").find("2026-10-19,1,1,0,0\r\n"),
             std::string::npos);
   EXPECT_NE(
       readFile(temp.path / "daily.txt").find("2026-10-19 | 1 | 1 | 0 | 0"),
@@ -424,6 +432,7 @@ TEST_F(Core, ReportErrorsAndPermissions) {
   TempDirectory temp;
   auto path = (temp.path / "patients.csv").string();
   reception();
+  EXPECT_THROW(app.patientReport(), std::runtime_error);
   EXPECT_THROW(app.exportPatients(path), std::runtime_error);
   EXPECT_THROW(app.dailyReport("2026-10-19"), std::runtime_error);
   EXPECT_THROW(app.exportDaily("2026-10-19", path), std::runtime_error);
