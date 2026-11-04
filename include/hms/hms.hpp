@@ -5,21 +5,52 @@
 #include <vector>
 
 namespace hms {
+/**
+ * @brief Patient demographic and identification entity (FR-PAT-01, FR-PAT-02).
+ *
+ * Represents a registered patient within the hospital management system, containing
+ * their formatted public identifier (e.g., 'P000001'), full legal name, age, gender,
+ * validated contact number, and ABO/Rh blood group.
+ */
 struct Patient {
-  std::string id, name;
-  int age;
-  std::string gender, contact, bloodGroup;
+  std::string id;         ///< Unique formatted public patient ID (e.g., "P000001").
+  std::string name;       ///< Full legal name of the patient.
+  int age;                ///< Patient age in years (0 to 130).
+  std::string gender;     ///< Patient gender ('Male', 'Female', or 'Other').
+  std::string contact;    ///< Validated contact phone number (7 to 15 digits).
+  std::string bloodGroup; ///< Validated ABO/Rh blood group ('A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-').
 };
+
+/**
+ * @brief Doctor professional profile entity (FR-DOC-01, FR-DOC-02).
+ *
+ * Represents a registered medical doctor within the hospital management system,
+ * including their unique autoincrement ID, full name, clinical specialization,
+ * and contact telephone number.
+ */
 struct Doctor {
-  int id;
-  std::string name, specialization, contact;
+  int id;                     ///< Unique system-assigned autoincrement doctor ID.
+  std::string name;           ///< Full name of the medical practitioner.
+  std::string specialization; ///< Medical specialty (e.g., "Cardiologist").
+  std::string contact;        ///< Validated contact phone number.
 };
+
+/**
+ * @brief Appointment consultation booking entity (FR-APP-01, FR-APP-02).
+ *
+ * Represents a 15-minute scheduled consultation slot between a registered patient
+ * and a doctor, tracking consultation date, time, and lifecycle status
+ * ('Scheduled', 'Canceled', or 'Completed').
+ */
 struct Appointment {
-  int id;
-  std::string patientId;
-  int doctorId;
-  std::string date, time, status;
+  int id;                 ///< Unique autoincrement appointment ID.
+  std::string patientId;  ///< Formatted public patient ID (e.g., "P000001").
+  int doctorId;           ///< ID of the assigned doctor.
+  std::string date;       ///< Consultation date formatted as YYYY-MM-DD.
+  std::string time;       ///< Consultation slot start time formatted as HH:MM.
+  std::string status;     ///< Lifecycle status ('Scheduled', 'Canceled', or 'Completed').
 };
+
 /**
  * @brief Authenticated user session state (FR-AUTH-02).
  *
@@ -28,22 +59,48 @@ struct Appointment {
  * ('Admin', 'Receptionist', or 'Doctor'), and linked doctor profile ID if applicable.
  */
 struct Session {
-  int userId;
-  std::string username, role;
-  int doctorId;
-};
-/** Counts appointments by their current scheduled date and current status. */
-struct DailyReport {
-  int totalBooked, scheduled, canceled, completed;
+  int userId;             ///< Database user primary key ID.
+  std::string username;   ///< Authenticated username.
+  std::string role;       ///< Assigned authorization role ('Admin', 'Receptionist', or 'Doctor').
+  int doctorId;           ///< Associated doctor profile ID for Doctor accounts (0 for others).
 };
 
-/** Business layer. Session state is private; every sensitive operation checks
- * its role. */
+/**
+ * @brief Summary statistics of appointments for a specific calendar date (FR-REP-01).
+ *
+ * Aggregates appointment metrics for administrative reporting, categorizing totals
+ * into overall booked, currently scheduled, canceled, and completed consultations.
+ */
+struct DailyReport {
+  int totalBooked;  ///< Total count of appointments recorded for the date.
+  int scheduled;    ///< Count of appointments currently in 'Scheduled' status.
+  int canceled;     ///< Count of appointments in 'Canceled' status.
+  int completed;    ///< Count of appointments in 'Completed' status.
+};
+
+/**
+ * @brief Business logic layer coordinating HMS services, authentication, and validation.
+ *
+ * Implements core business workflows across a 3-tier layered architecture:
+ * presentation calls HMS business methods, which enforce role-based access control (RBAC)
+ * via private session state and execute validated operations against the local SQLite DAL.
+ */
 class HMS {
   Database &db_;
   std::optional<Session> session_;
   int attempts_ = 0;
+
+  /**
+   * @brief Enforces role-based access control for calling service methods (FR-AUTH-02).
+   *
+   * Verifies that an active session exists and that the authenticated user's role
+   * is present in the list of authorized roles.
+   *
+   * @param roles List of authorized role names permitted to perform the operation.
+   * @throws std::runtime_error If no session is active or user's role is unauthorized ("Permission denied").
+   */
   void require(const std::vector<std::string> &roles) const;
+
   /**
    * @brief Validates doctor working hours and checks for conflicting bookings (FR-APP-02).
    *
@@ -60,7 +117,13 @@ class HMS {
                  int exclude = 0);
 
 public:
+  /**
+   * @brief Constructs an HMS business service instance bound to an underlying Database.
+   *
+   * @param db Reference to an initialized Database instance providing SQLite persistence.
+   */
   explicit HMS(Database &db) : db_(db) {}
+
   /**
    * @brief Bootstraps the initial system administrator account (SEC-REQ-01, FR-AUTH-02).
    *
@@ -135,9 +198,11 @@ public:
 
   /**
    * @brief Retrieves the active session state if authenticated (FR-AUTH-02).
-   * @return const std::optional<Session>& Current active session.
+   *
+   * @return const std::optional<Session>& Reference to current active session or std::nullopt.
    */
   const std::optional<Session> &session() const { return session_; }
+
   /**
    * @brief Registers a new patient into the system (FR-PAT-01, FR-PAT-02).
    *
@@ -160,6 +225,7 @@ public:
   Patient registerPatient(const std::string &name, int age,
                           const std::string &gender, const std::string &contact,
                           const std::string &blood);
+
   /**
    * @brief Searches for patients by exact Patient ID or name substring (FR-PAT-03).
    *
@@ -175,6 +241,7 @@ public:
    * @throws std::invalid_argument If query is invalid (empty, all-whitespace, non-printable, or > 100 characters).
    */
   std::vector<Patient> searchPatients(const std::string &query);
+
   /**
    * @brief Registers a new doctor profile into the system (FR-DOC-01, FR-DOC-02).
    *
@@ -191,6 +258,7 @@ public:
    */
   Doctor addDoctor(const std::string &name, const std::string &specialization,
                    const std::string &contact);
+
   /**
    * @brief Configures weekly working hours for a registered doctor (FR-DOC-03).
    *
@@ -220,6 +288,7 @@ public:
    * @throws std::runtime_error If caller is not authenticated as Admin or Receptionist.
    */
   std::vector<Doctor> doctors(const std::string &specialization);
+
   /**
    * @brief Books an appointment slot for a patient with availability and conflict validation (FR-APP-01, FR-APP-02).
    *
@@ -237,7 +306,8 @@ public:
    * @throws std::invalid_argument If date or time formatting fails validation.
    */
   Appointment book(const std::string &patientId, int doctorId,
-                   const std::string &date, const std::string &time);
+                    const std::string &date, const std::string &time);
+
   /**
    * @brief Updates contact information for a registered patient (FR-PAT-04).
    *
@@ -252,28 +322,144 @@ public:
    * @throws std::invalid_argument If the contact number fails format/length validation.
    */
   void updateContact(const std::string &patientId, const std::string &contact);
-  /** Receptionist-only cancellation and atomic rescheduling of Scheduled
-   * records. */
+
+  /**
+   * @brief Cancels an existing scheduled appointment (FR-APP-03).
+   *
+   * Enforces Receptionist-only authorization. Atomically transitions the appointment
+   * record from 'Scheduled' to 'Canceled' status within a database transaction,
+   * freeing the previously reserved consultation slot while preserving appointment history.
+   *
+   * @param appointmentId Unique identifier of the appointment to cancel.
+   * @throws std::runtime_error If caller is not a Receptionist, appointment does not exist,
+   *                            or appointment status is not 'Scheduled'.
+   */
   void cancel(int appointmentId);
+
+  /**
+   * @brief Atomically reschedules an appointment to a new date and time slot (FR-APP-04).
+   *
+   * Enforces Receptionist-only authorization. Verifies that the appointment exists in
+   * 'Scheduled' status, and that the doctor is available at the requested date and quarter-hour
+   * time without conflict against other active bookings (excluding this appointment).
+   * Atomically updates date and time within a transaction; rolls back on conflict.
+   *
+   * @param appointmentId Unique identifier of the appointment to reschedule.
+   * @param date New date formatted as YYYY-MM-DD.
+   * @param time New time slot formatted as HH:MM on a 15-minute boundary.
+   * @throws std::runtime_error If caller is not a Receptionist, appointment not found,
+   *                            appointment is not 'Scheduled', or doctor is unavailable / slot booked.
+   * @throws std::invalid_argument If date or time formatting fails validation.
+   */
   void reschedule(int appointmentId, const std::string &date,
                   const std::string &time);
-  /** Returns only the authenticated doctor's Scheduled appointments for the
-   * date. */
+
+  /**
+   * @brief Retrieves scheduled appointments for the authenticated doctor on a given date (FR-APP-05).
+   *
+   * Enforces Doctor-only authorization. Returns only consultations assigned to the authenticated
+   * doctor's linked doctor profile ID that are currently in 'Scheduled' status for the specified
+   * date, ordered chronologically by appointment time.
+   *
+   * @param date Date formatted as YYYY-MM-DD.
+   * @return std::vector<Appointment> List of scheduled appointments for the doctor.
+   * @throws std::runtime_error If caller is not authenticated as a Doctor.
+   * @throws std::invalid_argument If date formatting is invalid.
+   */
   std::vector<Appointment> mySchedule(const std::string &date);
-  /** Linked doctor may complete only their own Scheduled appointment. */
+
+  /**
+   * @brief Marks a scheduled consultation as completed (DEV-COMPLETE, FR-APP-05).
+   *
+   * Enforces Doctor-only authorization. Verifies that the appointment exists in 'Scheduled'
+   * status and belongs specifically to the authenticated doctor's linked profile ID.
+   * Transitions status to 'Completed' atomically in SQLite.
+   *
+   * @param appointmentId Unique identifier of the appointment to complete.
+   * @throws std::runtime_error If caller is not Doctor, appointment not found, appointment
+   *                            belongs to another doctor, or appointment is not 'Scheduled'.
+   */
   void complete(int appointmentId);
-  /** Administrator-only daily totals and local CSV/text report exports. */
+
+  /**
+   * @brief Generates aggregated appointment counts for a specific date (FR-REP-01).
+   *
+   * Enforces Administrator-only authorization. Validates the date format and queries SQLite
+   * to aggregate total bookings, scheduled, canceled, and completed appointments for the day.
+   *
+   * @param date Date formatted as YYYY-MM-DD.
+   * @return DailyReport Aggregated appointment metrics structure.
+   * @throws std::runtime_error If caller is not authenticated as an Administrator.
+   * @throws std::invalid_argument If date formatting is invalid.
+   */
   DailyReport dailyReport(const std::string &date);
+
+  /**
+   * @brief Exports all registered patient records to a formatted file (FR-REP-02).
+   *
+   * Enforces Administrator-only authorization. Validates the destination file path extension
+   * (.csv or .txt), formats demographic records with RFC 4180 CSV escaping or tabular plain text,
+   * and writes records ordered by patient ID.
+   *
+   * @param path Target filesystem path ending in .csv or .txt.
+   * @throws std::runtime_error If caller is not Admin, directory creation fails, or file cannot be opened.
+   * @throws std::invalid_argument If path extension is neither .csv nor .txt.
+   */
   void exportPatients(const std::string &path);
+
+  /**
+   * @brief Exports daily appointment summary metrics to a formatted file (FR-REP-03).
+   *
+   * Enforces Administrator-only authorization. Computes daily appointment statistics for
+   * the specified date and exports them as either comma-separated values (.csv) or formatted
+   * pipe-delimited text (.txt).
+   *
+   * @param date Date formatted as YYYY-MM-DD.
+   * @param path Target filesystem path ending in .csv or .txt.
+   * @throws std::runtime_error If caller is not Admin, date lookup fails, or file writing fails.
+   * @throws std::invalid_argument If date is invalid or path extension is neither .csv nor .txt.
+   */
   void exportDaily(const std::string &date, const std::string &path);
 };
-/** Shared validation runs in the business layer as well as interactive input
- * handling. */
+
+/**
+ * @brief Validates that a text string is non-empty, within length limits, and contains printable characters.
+ *
+ * @param text Input text string to validate.
+ * @param maxLength Maximum allowable character length.
+ * @param field Field name descriptor for error messages.
+ * @throws std::invalid_argument If text is empty, whitespace-only, exceeds maxLength, or contains non-printable characters.
+ */
 void validateText(const std::string &text, int maxLength,
                   const std::string &field);
+
+/**
+ * @brief Validates a contact phone number format.
+ *
+ * @param text Candidate contact number string.
+ * @throws std::invalid_argument If contact string contains fewer than 7 digits, exceeds 15 characters,
+ *                               or contains invalid characters other than '+', '-', space, or digits.
+ */
 void validateContact(const std::string &text);
+
+/**
+ * @brief Converts a 24-hour HH:MM time string to total minutes from midnight.
+ *
+ * @param time Time formatted as HH:MM.
+ * @return int Total minutes elapsed since 00:00 (0 to 1439).
+ * @throws std::invalid_argument If time format or hours/minutes are out of range.
+ */
 int minutes(const std::string &time);
+
+/**
+ * @brief Determines the day of the week for a given calendar date.
+ *
+ * @param date Date formatted as YYYY-MM-DD.
+ * @return int Day of week index (0 = Sunday, 1 = Monday, ..., 6 = Saturday).
+ * @throws std::invalid_argument If date format, month, or day values are invalid.
+ */
 int weekday(const std::string &date);
+
 /**
  * @brief Computes a salted SHA-256 cryptographic digest of a password (SEC-REQ-01).
  *
@@ -283,6 +469,7 @@ int weekday(const std::string &date);
  * @param salt 32-character hexadecimal 128-bit random salt.
  * @param password The plaintext password to hash.
  * @return std::string 64-character lowercase hexadecimal SHA-256 digest.
+ * @throws std::runtime_error If EVP digest calculation fails.
  */
 std::string passwordHash(const std::string &salt, const std::string &password);
 
