@@ -44,6 +44,18 @@ class HMS {
   std::optional<Session> session_;
   int attempts_ = 0;
   void require(const std::vector<std::string> &roles) const;
+  /**
+   * @brief Validates doctor working hours and checks for conflicting bookings (FR-APP-02).
+   *
+   * Verifies quarter-hour boundary alignment, doctor weekly shift hours, and absence
+   * of other active Scheduled appointments.
+   *
+   * @param doctorId Registered doctor ID.
+   * @param date Date formatted as YYYY-MM-DD.
+   * @param time Time formatted as HH:MM.
+   * @param exclude Optional appointment ID to exclude (used during rescheduling).
+   * @return true if slot is available; false otherwise.
+   */
   bool available(int doctorId, const std::string &date, const std::string &time,
                  int exclude = 0);
 
@@ -208,6 +220,22 @@ public:
    * @throws std::runtime_error If caller is not authenticated as Admin or Receptionist.
    */
   std::vector<Doctor> doctors(const std::string &specialization);
+  /**
+   * @brief Books an appointment slot for a patient with availability and conflict validation (FR-APP-01, FR-APP-02).
+   *
+   * Enforces Receptionist-only role authorization. Resolves the patient public ID,
+   * validates date (YYYY-MM-DD) and 15-minute slot boundary (HH:MM), verifies doctor shift availability,
+   * and ensures no conflicting active appointment exists. Inserts the record with 'Scheduled' status inside
+   * an atomic SQLite transaction.
+   *
+   * @param patientId Formatted public patient ID (e.g., 'P000001').
+   * @param doctorId Registered doctor ID.
+   * @param date Date formatted as YYYY-MM-DD.
+   * @param time Time formatted as HH:MM on a 15-minute boundary.
+   * @return Appointment Created appointment record with assigned ID and 'Scheduled' status.
+   * @throws std::runtime_error If caller is not Receptionist, patient not found, or doctor unavailable / slot booked.
+   * @throws std::invalid_argument If date or time formatting fails validation.
+   */
   Appointment book(const std::string &patientId, int doctorId,
                    const std::string &date, const std::string &time);
   /**
