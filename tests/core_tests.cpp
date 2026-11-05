@@ -20,7 +20,7 @@ public:
 };
 
 static std::string readFile(const std::filesystem::path &path) {
-  std::ifstream in(path);
+  std::ifstream in(path, std::ios::binary);
   std::ostringstream out;
   out << in.rdbuf();
   return out.str();
@@ -185,17 +185,40 @@ TEST_F(Core, TC_APP_02) {
   EXPECT_THROW(app.book(p.id, 999, "2026-10-19", "09:15"), std::runtime_error);
 }
 TEST_F(Core, TC_SEC_01) {
+  // [SEC-REQ-02] Prevent SQL injection via parameterized prepared statements
   EXPECT_FALSE(app.login("' OR 1=1 --", "anything"));
   EXPECT_FALSE(app.session());
+  EXPECT_FALSE(app.login("admin' --", "anything"));
+  EXPECT_FALSE(app.login("' UNION SELECT 1, 'admin', 'hash', 'salt', 'Admin', 0 --", "anything"));
 }
 TEST_F(Core, RolesEnforcedInServices) {
-  // [FR-AUTH-02] Restrict operations according to user roles
+  // [SEC-REQ-03, FR-AUTH-02] Enforce backend role-based authorization on service operations
+  // Doctor role: blocked from patient registration, doctor creation, provisioning, and booking
   app.login("doctor", "TestPass123");
   EXPECT_THROW(patient(), std::runtime_error);
   EXPECT_THROW(app.addDoctor("No", "No", "9000000001"), std::runtime_error);
   EXPECT_THROW(app.provision("bad", "TestPass123", "Admin"),
                std::runtime_error);
   EXPECT_THROW(app.book("P000001", 1, "2026-10-19", "09:00"),
+               std::runtime_error);
+  EXPECT_THROW(app.cancel(1), std::runtime_error);
+  EXPECT_THROW(app.dailyReport("2026-10-19"), std::runtime_error);
+  app.logout();
+
+  // Receptionist role: blocked from doctor addition, provisioning, dailyReport, and completion
+  reception();
+  EXPECT_THROW(app.addDoctor("Dr Denied", "Cardiology", "9000000099"),
+               std::runtime_error);
+  EXPECT_THROW(app.provision("user2", "TestPass123", "Doctor", 1),
+               std::runtime_error);
+  EXPECT_THROW(app.dailyReport("2026-10-19"), std::runtime_error);
+  EXPECT_THROW(app.complete(1), std::runtime_error);
+  app.logout();
+
+  // Unauthenticated caller: blocked from all protected operations
+  EXPECT_THROW(patient(), std::runtime_error);
+  EXPECT_THROW(app.addDoctor("No", "No", "9000000001"), std::runtime_error);
+  EXPECT_THROW(app.provision("bad", "TestPass123", "Admin"),
                std::runtime_error);
 }
 TEST_F(Core, HashesAreSaltedAndNeverPlaintext) {
@@ -382,6 +405,14 @@ TEST_F(Core, ReportContents) {
   app.book(p.id, 1, "2026-10-19", "09:00");
   app.logout();
   app.login("admin", "TestPass123");
+  const auto roster = app.patientReport();
+  ASSERT_EQ(roster.size(), 1u);
+  EXPECT_EQ(roster.front().id, p.id);
+  EXPECT_EQ(roster.front().name, p.name);
+  EXPECT_EQ(roster.front().age, p.age);
+  EXPECT_EQ(roster.front().gender, p.gender);
+  EXPECT_EQ(roster.front().contact, p.contact);
+  EXPECT_EQ(roster.front().bloodGroup, p.bloodGroup);
   TempDirectory temp;
   app.exportPatients((temp.path / "patients.csv").string());
   app.exportPatients((temp.path / "patients.txt").string());
@@ -391,7 +422,7 @@ TEST_F(Core, ReportContents) {
       readFile(temp.path / "patients.csv").find("\"Demo, \"\"Quoted\"\"\""),
       std::string::npos);
   EXPECT_NE(readFile(temp.path / "patients.txt").find(p.id), std::string::npos);
-  EXPECT_NE(readFile(temp.path / "daily.csv").find("2026-10-19,1,1,0,0"),
+  EXPECT_NE(readFile(temp.path / "daily.csv").find("2026-10-19,1,1,0,0\r\n"),
             std::string::npos);
   EXPECT_NE(
       readFile(temp.path / "daily.txt").find("2026-10-19 | 1 | 1 | 0 | 0"),
@@ -401,6 +432,7 @@ TEST_F(Core, ReportErrorsAndPermissions) {
   TempDirectory temp;
   auto path = (temp.path / "patients.csv").string();
   reception();
+  EXPECT_THROW(app.patientReport(), std::runtime_error);
   EXPECT_THROW(app.exportPatients(path), std::runtime_error);
   EXPECT_THROW(app.dailyReport("2026-10-19"), std::runtime_error);
   EXPECT_THROW(app.exportDaily("2026-10-19", path), std::runtime_error);

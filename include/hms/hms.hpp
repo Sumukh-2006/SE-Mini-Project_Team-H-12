@@ -64,13 +64,7 @@ struct Session {
   std::string role;       ///< Assigned authorization role ('Admin', 'Receptionist', or 'Doctor').
   int doctorId;           ///< Associated doctor profile ID for Doctor accounts (0 for others).
 };
-
-/**
- * @brief Summary statistics of appointments for a specific calendar date (FR-REP-01).
- *
- * Aggregates appointment metrics for administrative reporting, categorizing totals
- * into overall booked, currently scheduled, canceled, and completed consultations.
- */
+/** Counts appointments by current date. Total booked includes all three statuses. */
 struct DailyReport {
   int totalBooked;  ///< Total count of appointments recorded for the date.
   int scheduled;    ///< Count of appointments currently in 'Scheduled' status.
@@ -89,15 +83,15 @@ class HMS {
   Database &db_;
   std::optional<Session> session_;
   int attempts_ = 0;
-
   /**
-   * @brief Enforces role-based access control for calling service methods (FR-AUTH-02).
+   * @brief Enforces backend role-based authorization before sensitive service execution (SEC-REQ-03, FR-AUTH-02).
    *
-   * Verifies that an active session exists and that the authenticated user's role
-   * is present in the list of authorized roles.
+   * Verifies that an authenticated session is active and the current user's role
+   * is present in the specified allowed roles list. Rejects unauthorized callers at the
+   * backend C++ service layer prior to executing database queries or mutating state.
    *
-   * @param roles List of authorized role names permitted to perform the operation.
-   * @throws std::runtime_error If no session is active or user's role is unauthorized ("Permission denied").
+   * @param roles List of authorized role names (e.g., {"Admin"}, {"Receptionist"}, {"Doctor"}).
+   * @throws std::runtime_error With message "Permission denied" if session is absent or role is unauthorized.
    */
   void require(const std::vector<std::string> &roles) const;
 
@@ -380,45 +374,13 @@ public:
    *                            belongs to another doctor, or appointment is not 'Scheduled'.
    */
   void complete(int appointmentId);
-
-  /**
-   * @brief Generates aggregated appointment counts for a specific date (FR-REP-01).
-   *
-   * Enforces Administrator-only authorization. Validates the date format and queries SQLite
-   * to aggregate total bookings, scheduled, canceled, and completed appointments for the day.
-   *
-   * @param date Date formatted as YYYY-MM-DD.
-   * @return DailyReport Aggregated appointment metrics structure.
-   * @throws std::runtime_error If caller is not authenticated as an Administrator.
-   * @throws std::invalid_argument If date formatting is invalid.
-   */
+  /** @brief Admin-only counts for a validated YYYY-MM-DD appointment date. */
   DailyReport dailyReport(const std::string &date);
-
-  /**
-   * @brief Exports all registered patient records to a formatted file (FR-REP-02).
-   *
-   * Enforces Administrator-only authorization. Validates the destination file path extension
-   * (.csv or .txt), formats demographic records with RFC 4180 CSV escaping or tabular plain text,
-   * and writes records ordered by patient ID.
-   *
-   * @param path Target filesystem path ending in .csv or .txt.
-   * @throws std::runtime_error If caller is not Admin, directory creation fails, or file cannot be opened.
-   * @throws std::invalid_argument If path extension is neither .csv nor .txt.
-   */
+  /** @brief Admin-only roster of all registered patients in registration order. */
+  std::vector<Patient> patientReport();
+  /** @brief Admin-only roster export to .txt or RFC 4180 CSV. */
   void exportPatients(const std::string &path);
-
-  /**
-   * @brief Exports daily appointment summary metrics to a formatted file (FR-REP-03).
-   *
-   * Enforces Administrator-only authorization. Computes daily appointment statistics for
-   * the specified date and exports them as either comma-separated values (.csv) or formatted
-   * pipe-delimited text (.txt).
-   *
-   * @param date Date formatted as YYYY-MM-DD.
-   * @param path Target filesystem path ending in .csv or .txt.
-   * @throws std::runtime_error If caller is not Admin, date lookup fails, or file writing fails.
-   * @throws std::invalid_argument If date is invalid or path extension is neither .csv nor .txt.
-   */
+  /** @brief Admin-only daily totals export to .txt or RFC 4180 CSV. */
   void exportDaily(const std::string &date, const std::string &path);
 };
 

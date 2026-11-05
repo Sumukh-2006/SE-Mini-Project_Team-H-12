@@ -8,11 +8,23 @@ Statement::Statement(sqlite3 *db, const std::string &sql) {
     throw std::runtime_error(sqlite3_errmsg(db));
 }
 Statement::~Statement() { sqlite3_finalize(stmt_); }
+/**
+ * @brief Binds a text parameter to a prepared statement in constant memory (SEC-REQ-02).
+ *
+ * Employs sqlite3_bind_text with SQLITE_TRANSIENT, treating input strictly as literal
+ * data. Prevents SQL injection by ensuring values never alter query structure or logic.
+ */
 void Statement::bind(int i, const std::string &value) {
   if (sqlite3_bind_text(stmt_, i, value.c_str(), static_cast<int>(value.size()),
                         SQLITE_TRANSIENT) != SQLITE_OK)
     throw std::runtime_error("Cannot bind text");
 }
+
+/**
+ * @brief Binds an integer parameter to a prepared statement (SEC-REQ-02).
+ *
+ * Employs sqlite3_bind_int, ensuring typed parameter passing and zero SQL injection risk.
+ */
 void Statement::bind(int i, int value) {
   if (sqlite3_bind_int(stmt_, i, value) != SQLITE_OK)
     throw std::runtime_error("Cannot bind number");
