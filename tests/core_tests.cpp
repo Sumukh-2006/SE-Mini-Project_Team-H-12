@@ -482,7 +482,11 @@ TEST_F(Core, AvailabilityUpdates) {
                std::invalid_argument);
   EXPECT_NO_THROW(app.setAvailability(1, 1, "09:00", "12:00"));
 }
+/**
+ * @brief [NFR-PERF-01] Validates that database queries complete within 2 seconds for 10,000 patient records.
+ */
 TEST_F(Core, TC_NFR_01) {
+  // [NFR-PERF-01] Query performance verification across 10,000 patient records
   reception();
   {
     hms::Transaction tx(db);
@@ -505,9 +509,12 @@ TEST_F(Core, TC_NFR_01) {
   EXPECT_LT(seconds, 2.0);
   RecordProperty("query_seconds", seconds);
 }
+
+/**
+ * @brief [NFR-MAINT-02] Verifies memory safety and zero memory leaks under Valgrind during full appointment lifecycles.
+ */
 TEST_F(Core, TC_NFR_02) {
-  // The external Valgrind invocation supplies the leak verdict for this
-  // workflow.
+  // [NFR-MAINT-02] The external Valgrind invocation supplies the zero-leak verdict for this workflow.
   reception();
   auto p = patient();
   auto a = app.book(p.id, 1, "2026-10-19", "09:00");
