@@ -325,6 +325,7 @@ TEST_F(Core, UpdateContact) {
   EXPECT_THROW(app.updateContact(p.id, "9000000008"), std::runtime_error);
 }
 TEST_F(Core, TC_APP_03) {
+  // [FR-APP-03] Cancel an appointment (receptionist role, slot freed, history preserved)
   reception();
   auto p = patient();
   auto a = app.book(p.id, 1, "2026-10-19", "09:00");
@@ -333,30 +334,47 @@ TEST_F(Core, TC_APP_03) {
   q.bind(1, a.id);
   ASSERT_TRUE(q.step());
   EXPECT_EQ(q.text(0), "Canceled");
+  // Freed slot can now be re-booked by another patient
   EXPECT_NO_THROW(app.book(p.id, 1, "2026-10-19", "09:00"));
+  // Canceling already canceled appointment must throw
   EXPECT_THROW(app.cancel(a.id), std::runtime_error);
+  // Canceling non-existent appointment must throw
   EXPECT_THROW(app.cancel(999), std::runtime_error);
 }
 TEST_F(Core, RescheduleIsAtomic) {
+  // [FR-APP-04] Reschedule an appointment with atomic rollback on conflict
   reception();
   auto p = patient();
   auto a = app.book(p.id, 1, "2026-10-19", "09:00");
   app.book(p.id, 1, "2026-10-19", "09:15");
+  // Conflict: target slot already taken by another appointment
   EXPECT_THROW(app.reschedule(a.id, "2026-10-19", "09:15"), std::runtime_error);
   {
+    // Atomic rollback check: original time must be preserved
     auto q = db.prepare("SELECT appt_time FROM appointments WHERE id=?");
     q.bind(1, a.id);
     ASSERT_TRUE(q.step());
     EXPECT_EQ(q.text(0), "09:00");
   }
+  // Invalid calendar date format rejected
   EXPECT_THROW(app.reschedule(a.id, "2026-02-30", "09:00"),
                std::invalid_argument);
+  // Valid reschedule to an open slot succeeds
   EXPECT_NO_THROW(app.reschedule(a.id, "2026-10-19", "09:30"));
+  {
+    auto q = db.prepare("SELECT appt_time FROM appointments WHERE id=?");
+    q.bind(1, a.id);
+    ASSERT_TRUE(q.step());
+    EXPECT_EQ(q.text(0), "09:30");
+  }
+  // Original slot (09:00) is now freed and can be re-booked
   EXPECT_NO_THROW(app.book(p.id, 1, "2026-10-19", "09:00"));
   app.cancel(a.id);
+  // Cannot reschedule canceled appointment
   EXPECT_THROW(app.reschedule(a.id, "2026-10-19", "09:45"), std::runtime_error);
 }
 TEST_F(Core, DoctorsSeeOnlyOwnSchedule) {
+  // [FR-APP-05] View doctor's daily appointments (doctor isolation & chronological order)
   app.login("admin", "TestPass123");
   auto d = app.addDoctor("Dr Lee", "Dentist", "9000000003");
   app.setAvailability(d.id, 1, "09:00", "17:00");
@@ -367,12 +385,18 @@ TEST_F(Core, DoctorsSeeOnlyOwnSchedule) {
   auto a = app.book(p.id, 1, "2026-10-19", "09:00");
   auto other = app.book(p.id, d.id, "2026-10-19", "09:00");
   app.logout();
+  // Doctor 1 views schedule
   app.login("doctor", "TestPass123");
   auto result = app.mySchedule("2026-10-19");
   ASSERT_EQ(result.size(), 1u);
   EXPECT_EQ(result[0].id, a.id);
+  EXPECT_EQ(result[0].patientId, p.id);
+  EXPECT_EQ(result[0].time, "09:00");
+  // Cannot complete another doctor's consultation
   EXPECT_THROW(app.complete(other.id), std::runtime_error);
+  // Malformed date strings rejected
   EXPECT_THROW(app.mySchedule("bad"), std::invalid_argument);
+  // Days with no appointments return empty vector
   EXPECT_TRUE(app.mySchedule("2026-10-20").empty());
 }
 TEST_F(Core, DailyCountsAndCompletion) {
