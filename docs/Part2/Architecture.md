@@ -101,3 +101,7 @@ sequenceDiagram
         B-->>R: Rejected; original booking preserved
     end
 ```
+
+## Source documentation (NFR-MAINT-01)
+
+Public interfaces across the business layer (`include/hms/hms.hpp`) and data access layer (`include/hms/database.hpp`) are formally documented using standard Doxygen comment blocks. All public classes, structs, member functions, parameters (`@param`), return values (`@return`), and exception specifications (`@throws`) adhere to unified Doxygen conventions to ensure maintainability, clear API contracts, and seamless developer onboarding.
