@@ -32,6 +32,7 @@ with tempfile.TemporaryDirectory(prefix="hms-system-") as directory:
     app.sendline("2");app.expect_exact("Patient ID or name: ")
     start=time.perf_counter();app.sendline("Performance Patient");app.expect_exact("Choice: ")
     broad_elapsed=time.perf_counter()-start
+    # [NFR-PERF-02] Application memory usage remains strictly within 50 MB RAM (51,200 KB)
     status=Path(f"/proc/{app.pid}/status").read_text()
     rss_kb=int(next(line.split()[1] for line in status.splitlines() if line.startswith("VmRSS:")))
     assert rss_kb<50*1024,f"Memory footprint {rss_kb}KB exceeds 50MB"
