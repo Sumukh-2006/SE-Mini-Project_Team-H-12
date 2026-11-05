@@ -53,6 +53,17 @@ Appointment HMS::book(const std::string &patient, int doctor,
   tx.commit();
   return {id, patient, doctor, date, time, "Scheduled"};
 }
+/**
+ * @brief Cancels an existing scheduled appointment and frees the consultation slot (FR-APP-03).
+ *
+ * Enforces Receptionist-only role authorization. Atomically transitions the appointment
+ * record from 'Scheduled' to 'Canceled' within a database transaction, immediately freeing
+ * the time slot for subsequent bookings while preserving the historical record in the database.
+ *
+ * @param id Unique database identifier of the appointment to cancel.
+ * @throws std::runtime_error If caller is not Receptionist, appointment does not exist,
+ *                            or appointment status is not 'Scheduled'.
+ */
 void HMS::cancel(int id) {
   require({"Receptionist"});
   Transaction tx(db_);
@@ -67,6 +78,23 @@ void HMS::cancel(int id) {
   q.step();
   tx.commit();
 }
+
+/**
+ * @brief Atomically reschedules an appointment to a new date and time slot (FR-APP-04).
+ *
+ * Enforces Receptionist-only role authorization. Validates that the appointment exists in
+ * 'Scheduled' status, checks doctor weekly availability and slot boundaries for the target date
+ * and time (excluding the current appointment ID), and updates the record within a database
+ * transaction. If validation or availability fails, the transaction is rolled back, preserving
+ * the original appointment date and time.
+ *
+ * @param id Unique database identifier of the appointment to reschedule.
+ * @param date Target date formatted as YYYY-MM-DD.
+ * @param time Target time formatted as HH:MM on a 15-minute boundary.
+ * @throws std::runtime_error If caller is not Receptionist, appointment does not exist,
+ *                            appointment is not 'Scheduled', or the doctor/slot is unavailable.
+ * @throws std::invalid_argument If date or time formatting fails validation.
+ */
 void HMS::reschedule(int id, const std::string &date, const std::string &time) {
   require({"Receptionist"});
   Transaction tx(db_);
@@ -87,6 +115,19 @@ void HMS::reschedule(int id, const std::string &date, const std::string &time) {
   q.step();
   tx.commit();
 }
+
+/**
+ * @brief Retrieves scheduled appointments for the authenticated doctor on a given date (FR-APP-05).
+ *
+ * Enforces Doctor-only role authorization. Validates the date format and queries all appointments
+ * in 'Scheduled' status assigned strictly to the authenticated doctor's registered ID,
+ * returning them in chronological order by appointment time.
+ *
+ * @param date Date formatted as YYYY-MM-DD.
+ * @return std::vector<Appointment> List of scheduled appointments for the doctor.
+ * @throws std::runtime_error If caller is not authenticated as a Doctor.
+ * @throws std::invalid_argument If date formatting fails validation.
+ */
 std::vector<Appointment> HMS::mySchedule(const std::string &date) {
   require({"Doctor"});
   weekday(date);
